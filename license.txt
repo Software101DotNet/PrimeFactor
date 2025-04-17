@@ -1,5 +1,3 @@
-Project: https://github.com/Software101DotNet/PrimeFactor
-
 MIT License
 
 Copyright (c) 2023 Anthony Ransley

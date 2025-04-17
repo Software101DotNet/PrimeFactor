@@ -201,7 +201,7 @@ Project Link: [https://github.com/Software101DotNet/PrimeFactor](https://github.
 [issues-url]: https://github.com/Software101DotNet/CreateDotNetProject/issues
 
 [license-shield]: https://img.shields.io/github/license/Software101DotNet/PrimeFactor.svg?style=for-the-badge
-[license-url]: https://github.com/Software101DotNet/PrimeFactor/blob/main/LICENSE.txt
+[license-url]: https://github.com/Software101DotNet/PrimeFactor/blob/main/license.txt
 
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white

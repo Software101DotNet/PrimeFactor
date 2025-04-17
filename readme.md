@@ -68,7 +68,7 @@ https://www.markdownguide.org/basic-syntax/#reference-style-links
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Prime Factor][product-screenshot]](https://www.software101.net/PrimeFactor)
+[Prime Factor](https://www.software101.net/PrimeFactor)
 
 A command line tool for prime math research, teaching and cryptography subjects:
   * factoring a composite given number into its prime factors
@@ -201,8 +201,7 @@ Project Link: [https://github.com/Software101DotNet/PrimeFactor](https://github.
 [issues-url]: https://github.com/Software101DotNet/CreateDotNetProject/issues
 
 [license-shield]: https://img.shields.io/github/license/Software101DotNet/PrimeFactor.svg?style=for-the-badge
-[license-url]: https://github.com/Software101DotNet/PrimeFactor/blob/master/LICENSE.txt
-
+[license-url]: https://github.com/Software101DotNet/PrimeFactor/blob/main/license.txt
 
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white

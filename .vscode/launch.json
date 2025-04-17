@@ -1,0 +1,41 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "--generate",
+			"type": "coreclr", //"dotnet",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["--generate","--count","5"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": true,
+			"console": "internalConsole" 
+		},
+		{
+			"name": "No command",
+			"type": "coreclr", 
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["10731","193","91"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		},
+		{
+			"name": "--factor",
+			"type": "coreclr", //"dotnet",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["--factor","193","931"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		}
+	]
+}

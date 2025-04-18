@@ -24,7 +24,7 @@ https://www.markdownguide.org/basic-syntax/#reference-style-links
 <h3 align="center">Prime Factor</h3>
 
   <p align="center">
-    A command line tool for prime math research, teaching and cryptography subjects. 
+    A command line tool for assisting number theory research, teaching and cryptography subjects. 
     <br>Runs on Windows, macOS and Linux. Native support for x64 and ARM platforms<br/>
     <br />
     <a href="https://github.com/Software101DotNet/PrimeFactor">View Demo</a>
@@ -70,10 +70,10 @@ https://www.markdownguide.org/basic-syntax/#reference-style-links
 
 [Prime Factor](https://www.software101.net/PrimeFactor)
 
-A command line tool for prime math research, teaching and cryptography subjects:
-  * factoring a composite given number into its prime factors
-  * generating a series of prime numbers of a given range from 1 to 18,446,744,073,709,551,616.
-  * calculate the Greatest Common Divisor for a given series of numbers
+A command line tool for assisting number theory research, teaching and cryptography subjects:
+  * Factoring a composite given number into its prime factors
+  * Generating a series of prime numbers of a given range from 1 to 18,446,744,073,709,551,616.
+  * Calculate the Greatest Common Divisor for a given series of numbers
 
 
 
@@ -111,14 +111,20 @@ A command line tool for prime math research, teaching and cryptography subjects:
 
 ### Installation
 
-1. Clone the repo
+1. Clone the project's repository
    ```sh
    git clone https://github.com/Software101DotNet/PrimeFactor.git
    ```
 2. Build the project
    ```sh
-   dotnet build -c Release PrimeFactor.csproj
+   dotnet build -c Release PrimeFactor/PrimeFactor.csproj
    ```
+3. Optionally, run the project's unit tests. Optionally, build the debug version and run the project's unit tests. Depending on the computer, these tests can take a few seconds to several minutes. In the unlikely event that any tests fail, please create a [new issue](https://github.com/Software101DotNet/CreateDotNetProject/issues) ticket.
+   ```sh
+   dotnet build -c debug PrimeFactor.sln
+   dotnet test xUnitTests/bin/Debug/net9.0/xUnitTests.dll
+   ```
+
 
 
 <!-- USAGE EXAMPLES -->
@@ -137,8 +143,8 @@ For upto date usage, Run
 - [completed v1.0] Prime number series generation
     - [Complated v1.0] support for directing output to a file stream. Usesful for very large series generation.
 - [ v2 ] Support for Greatest Common Divisor
-- [ v3 ] Support for perfect numbers
-- [ v4 ] Support for number range 1 to 2^128 bits
+- [ v3 ] Support for Perfect Numbers
+- [ v4 ] Support for number range 1 to 340,282,366,920,938,463,463,374,607,431,768,211,455 (2^128 bits) 
 
 See the [open issues](https://github.com/Software101DotNet/CreateDotNetProject/issues) for a full list of proposed features (and known issues).
 
@@ -146,7 +152,7 @@ See the [open issues](https://github.com/Software101DotNet/CreateDotNetProject/i
 <!-- CONTRIBUTING -->
 ## Contributing
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have any additions or improvements that would make this project better, please fork the repository and create a pull request. You can also simply open an issue with the tag "enhancement". Thanks.
 
 
 1. Fork the Project

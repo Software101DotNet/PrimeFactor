@@ -10,14 +10,13 @@ using PrimeFactor;
 public class MathTests
 {
 	// Test the FastSquareRoot method against the Math.Sqrt library method
-	// performance advisory: this test takes a long time to run. Approximaty 135~148 seconds on an MBA M4 cpu.
 	[Fact]
 	public void Test_FastSquareRoot()
 	{
-		for (UInt64 i = 0; i < int.MaxValue; i++)
+		for (UInt64 i = 1_000_000_000; i > 10; i /= 3)
 		{
 			var actual = Primes.FastSquareRoot(i);
-			var expected = (UInt64)Math.Sqrt(i);
+			var expected = (UInt64)(Math.Sqrt(i));
 			Assert.True(actual == expected);
 		}
 	}

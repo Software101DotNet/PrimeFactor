@@ -11,20 +11,36 @@ public class Benchmark
 {
 	/// Method to messuring the Prime Generation performance of a computer platform.
 	/// Past runs on the following platforms:
-	/// MacBook Air M4 Benchmarking 10,000,000 primes. Time to compute 14s,878ms 
-	/// Mac Mini M2P Benchmarking 10,000,000 primes. Time to compute 17s,457ms 
+	/// MacBook Air M4, Benchmarking 10,000,000 primes. Time to compute 14s,878ms 
+	/// Mac Mini M2P, Benchmarking 10,000,000 primes. Time to compute 17s 310ms ~ 17s 686ms
+	/// Xeon E5-1650 v2, Benchmarking 10,000,000 primes. Time to compute 2m 26s 217ms ~ 2m 28s 41ms
 	public static void Serial10M()
 	{
 		const uint limit = 10_000_000;
-		Console.Write($"Benchmarking {limit:N0} primes. ");
+		const int runs = 5;
+		Console.WriteLine($"Benchmarking {limit:N0} primes ({runs} runs)");
 
+		var writer = new StreamWriter(Stream.Null);
 		Stopwatch stopWatch = new Stopwatch();
-		stopWatch.Start();
+		long min = long.MaxValue;
+		long max = 0;
 
-		// using a null stream as there is no need to write the resulting calculations to a screen or file.
-		Prime.GeneratePrimes(writer: new StreamWriter(Stream.Null), maxIndex: limit);
+		for (var i = 1; i <= runs; i++)
+		{
+			Console.Write($"Run {i} ");
+			stopWatch.Restart();
 
-		stopWatch.Stop();
-		Console.WriteLine("Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
+			// using a null stream as there is no need to write the resulting calculations to a screen or file.
+			Prime.GeneratePrimes(writer, maxIndex: limit);
+
+			stopWatch.Stop();
+			min = long.Min(stopWatch.Elapsed.Ticks, min);
+			max = long.Max(stopWatch.Elapsed.Ticks, max);
+			Console.WriteLine($"time to compute ".FormatTimeSpan(stopWatch.Elapsed));
+		}
+
+		var minTS = new TimeSpan(min);
+		var maxTS = new TimeSpan(max);
+		Console.WriteLine($"Time to compute ".FormatTimeSpan(minTS) + "~ ".FormatTimeSpan(maxTS));
 	}
 }

@@ -14,25 +14,26 @@ public static class StringExtensions
 	public static string FormatTimeSpan(this string message, TimeSpan ts)
 	{
 		StringBuilder sb = new StringBuilder(256);
-		
-		if (!string.IsNullOrEmpty(message)) {
+
+		if (!string.IsNullOrEmpty(message))
+		{
 			sb.Append(message);
 		}
 		if (ts.Days > 0)
 		{
-			sb.Append($"{ts.Days}d,{ts.Hours}h,{ts.Minutes}m,{ts.Seconds}s,{ts.Milliseconds}ms ");
+			sb.Append($"{ts.Days}d {ts.Hours}h {ts.Minutes}m {ts.Seconds}s {ts.Milliseconds}ms ");
 		}
 		else if (ts.Hours > 0)
 		{
-			sb.Append($"{ts.Hours}h,{ts.Minutes}m,{ts.Seconds}s,{ts.Milliseconds}ms ");
+			sb.Append($"{ts.Hours}h {ts.Minutes}m {ts.Seconds}s {ts.Milliseconds}ms ");
 		}
 		else if (ts.Minutes > 0)
 		{
-			sb.Append($"{ts.Minutes}m,{ts.Seconds}s,{ts.Milliseconds}ms ");
+			sb.Append($"{ts.Minutes}m {ts.Seconds}s {ts.Milliseconds}ms ");
 		}
 		else if (ts.Seconds > 0)
 		{
-			sb.Append($"{ts.Seconds}s,{ts.Milliseconds}ms ");
+			sb.Append($"{ts.Seconds}s {ts.Milliseconds}ms ");
 		}
 		else if (ts.Milliseconds > 0)
 		{

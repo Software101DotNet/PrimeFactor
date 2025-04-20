@@ -11,42 +11,13 @@ namespace PrimeFactor;
 
 public static class StringExtensions
 {
-    public static void WriteLine(this string message, ConsoleColor color)
-    {
-        var originalForegroundColor = Console.ForegroundColor;
-        Console.ForegroundColor = color;
-        Console.WriteLine(message);
-        Console.ForegroundColor = originalForegroundColor;
-    }
-}
-
-// Using ConsoleExtended as a wrapper class because extending WriteLine as an extension method would require 
-// passing Console as a parameter, but his is not possible because Console is a Static Type.
-// See error CS0721: 'Console': static types cannot be used as parameters
-public static class ConsoleExtended
-{
-	public static void WriteLine(string message, ConsoleColor color)
-	{
-		var originalForegroundColour = Console.ForegroundColor;
-		Console.ForegroundColor = color;
-		Console.WriteLine(message);
-		Console.ForegroundColor = originalForegroundColour;
-	}
-	public static void Write(string message, ConsoleColor color)
-	{
-		var originalForegroundColour = Console.ForegroundColor;
-		Console.ForegroundColor = color;
-		Console.Write(message);
-		Console.ForegroundColor = originalForegroundColour;
-	}
-}
-
-public class ConsoleDisplay
-{
-	// Returns the elapsed time as a minimal formatted string. Does not include needless zero value units.
-	public static string FormatTimeSpan(TimeSpan ts)
+	public static string FormatTimeSpan(this string message, TimeSpan ts)
 	{
 		StringBuilder sb = new StringBuilder(256);
+		
+		if (!string.IsNullOrEmpty(message)) {
+			sb.Append(message);
+		}
 		if (ts.Days > 0)
 		{
 			sb.Append($"{ts.Days}d,{ts.Hours}h,{ts.Minutes}m,{ts.Seconds}s,{ts.Milliseconds}ms ");
@@ -74,6 +45,31 @@ public class ConsoleDisplay
 
 		return sb.ToString();
 	}
+}
+
+// Using ConsoleExtended as a wrapper class because extending WriteLine as an extension method would require 
+// passing Console as a parameter, but his is not possible because Console is a Static Type.
+// See error CS0721: 'Console': static types cannot be used as parameters
+public static class ConsoleExtended
+{
+	public static void WriteLine(string message, ConsoleColor color)
+	{
+		var originalForegroundColour = Console.ForegroundColor;
+		Console.ForegroundColor = color;
+		Console.WriteLine(message);
+		Console.ForegroundColor = originalForegroundColour;
+	}
+	public static void Write(string message, ConsoleColor color)
+	{
+		var originalForegroundColour = Console.ForegroundColor;
+		Console.ForegroundColor = color;
+		Console.Write(message);
+		Console.ForegroundColor = originalForegroundColour;
+	}
+}
+
+public class ConsoleDisplay
+{
 
 	public static void Display(Factored n, bool quite = false)
 	{
@@ -87,7 +83,7 @@ public class ConsoleDisplay
 		}
 		else
 		{
-			string elapsedTime = FormatTimeSpan(n.ComputationTime);
+			string elapsedTime = string.Empty; //FormatTimeSpan(n.ComputationTime);
 
 			if (n.Value() <= 1)
 			{
@@ -114,7 +110,7 @@ public class ConsoleDisplay
 		Console.ForegroundColor = ConsoleColor.Cyan;
 		Console.Write("composite");
 		Console.ForegroundColor = originalColour;
-		Console.Write($" number, made up of the {primeFactors.Count} prime factors: ");
+		Console.Write($" number made up of the {primeFactors.Count} prime factors: ");
 		Console.ForegroundColor = ConsoleColor.Red;
 		foreach (var primeFactor in primeFactors)
 		{
@@ -194,19 +190,19 @@ public class ConsoleDisplay
 		Console.WriteLine("Display the program version and poignuant platform information.");
 		ConsoleExtended.WriteLine("\t--version\n", colour);
 
-		Console.WriteLine("Display the prime factors of the given number n.");
+		Console.WriteLine("Calculate the prime factors of the given number n.");
 		Console.WriteLine("If the number is prime, then the output will be the single value n that is itself prime.");
 		Console.WriteLine("If the number is composite, then the output will be the calculated prime factors of n.");
 		Console.WriteLine("If a list of numbers are given, then the output will be the calculated prime factors of each number.");
 		ConsoleExtended.WriteLine("\t--factor [n | n .. nk] \n", colour);
 
-		Console.WriteLine("Generate a list of prime numbers. [optional] limits can be set.");
+		Console.WriteLine("Generate a list of prime numbers.");
 		Console.WriteLine("The default is to generate all primes from 0 to 2^64-1.");
 		Console.WriteLine("The --min and --max options are used to set the range of prime numbers to generate.");
-		Console.WriteLine("The --count option is used to set the maximum number of primes to generate. The default is 0, which means no limit.");
-		Console.WriteLine("if both --max and --count are specified, then the generation will stop when the first of the two limits is reached.");
-		Console.WriteLine("The --filename option is used to set the name of the file to save the generated primes to. if no path is give, the file is created in the current directory.");
-		ConsoleExtended.WriteLine("\t--generate [--min value] [--max value] [--count value]\n", colour);
+		Console.WriteLine("The --count option is used to set the maximum number of primes to generate.");
+		Console.WriteLine("If both --max and --count are specified, then the generation will stop when the first of the two limits is reached.");
+		Console.WriteLine("Use the --filename option when you want the generated prime values to be saved to the given file instead of the terminal window.");
+		ConsoleExtended.WriteLine("\t--generate [--min value] [--max value] [--count value] [--filename result.txt]\n", colour);
 		Console.ForegroundColor = originalForegroundColour;
 	}
 }

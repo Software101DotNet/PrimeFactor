@@ -3,7 +3,8 @@
 // The use of this source code file is governed by the license outlined in the License.txt file of this project.
 // https://github.com/Software101DotNet/PrimeFactor
 
-using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace PrimeFactor;
 
@@ -12,38 +13,49 @@ public enum Modes
 	Undefined,  // program run with either no commands or an invalid command
 	Help,       // display usage information
 	Version,    // display version information
-
 	Factor,     // find the prime factors of the given number or indicate that the number is prime.
 	GeneratePrimes,
+	Benchmark,  // benchmark performance
+	PerfectNumber,
 	GCD         // find the greatest common divisor of the given set of numbers.
 }
 
 public enum LogLevel { Quite = 0, Error, Warning, Info, Diag }
 
-public class CmdlineSettings
+public struct Settings
+{
+	public Settings() { }
+	public string DataFilename { get; set; } = string.Empty;
+	public bool DevMode { get; set; } = false;// used to enable development mode features such as time expensive or destructive processing operations will be skipped.
+	public Modes Mode { get; set; } = Modes.Undefined;
+	public LogLevel LogLevel { get; set; } = LogLevel.Warning;
+
+	// List of candidates to factor. 
+	public List<ulong> candidates { get; set; } = new List<ulong>();
+
+	public ulong maxPrime { get; set; } = ulong.MaxValue;
+	public ulong minPrime { get; set; } = 1;
+	public ulong maxPrimeCount { get; set; } = Int32.MaxValue / 2; // the upper limit of the memory cache of generated primes
+}
+
+public static class CmdlineSettings
 {
 	private const string ConflictingModesErrorMsg = "Multiple mode commands given. See help for usage information.";
 	private const string defaultCommand = "--default";
-
-	public string DataFilename { get; private set; } = string.Empty;
-	public bool DevMode { get; private set; } = false;// used to enable development mode features. Time expensive or destructive processing operations will be skipped.
-	public Modes Mode { get; private set; } = Modes.Undefined;
-	public LogLevel LogLevel { get; private set; } = LogLevel.Warning;
-
-	// List of candidates to factor. 
-	public List<ulong> candidates { get; private set; } = new List<ulong>();
-
-	public ulong maxPrime { get; private set; } = ulong.MaxValue;
-	public ulong minPrime { get; private set; } = 1;
-	public int maxPrimeCount { get; private set; } = Int32.MaxValue / 2; // the upper limit of the memory cache of generated primes
+	private const string MaxPrimeCountCommand = "--count";
+	private const string MaxPrimeCommand = "--max";
+	private const string MinPrimeCommand = "--min";
 
 	/// <summary>
-	/// Parses the command line arguments and sets the appropriate properties.
+	/// Parses the command line arguments and sets the appropriate properties of the CmdlineSettings object.
+	/// The command line arguments are expected to be in the form of "--<command> <value1> <value2> ...".
 	/// </summary>
 	/// <param name="args"></param>
-	/// <returns></returns>
-	public CmdlineSettings(string[] args)
+	/// <returns></returns>	
+	public static Settings Parse(string[] args)
 	{
+		Settings settings = new();
+
 		try
 		{
 			var result = SeparateParams(args);
@@ -52,51 +64,25 @@ public class CmdlineSettings
 				switch (param.Key)
 				{
 					case "--help":
-						if (Mode != Modes.Undefined)
-						{
-							throw new ArgumentException(ConflictingModesErrorMsg);
-						}
-						Mode = Modes.Help;
+						SetMode(ref settings, Modes.Help);
 						break;
 
 					case "--version":
-						if (Mode != Modes.Undefined)
-						{
-							throw new ArgumentException(ConflictingModesErrorMsg);
-						}
-						Mode = Modes.Version;
+						SetMode(ref settings, Modes.Version);
 						break;
 
 					case defaultCommand:
 					case "--factor":
-						if (Mode != Modes.Undefined)
-						{
-							throw new ArgumentException(ConflictingModesErrorMsg);
-						}
-						Mode = Modes.Factor;
-						if (param.Value.Count < 2)
-						{
-							throw new ArgumentException("--factor value not specified.");
-						}
-						foreach (var s in param.Value[1..])
-						{
-							if (ulong.TryParse(s, out ulong n))
-							{
-								candidates.Add(n);
-							}
-							else
-							{
-								throw new ArgumentException($"Invalid number {s} specified for --factor.");
-							}
-						}
+						SetMode(ref settings, Modes.Factor);
+						settings.candidates = ParseCommandValues(param.Value,"--factor");
 						break;
 
 					case "--generate":
-						if (Mode != Modes.Undefined)
-						{
-							throw new ArgumentException(ConflictingModesErrorMsg);
-						}
-						Mode = Modes.GeneratePrimes;
+						SetMode(ref settings, Modes.GeneratePrimes);
+						break;
+
+					case "--benchmark":
+						SetMode(ref settings, Modes.Benchmark);
 						break;
 
 					case "--filename":
@@ -104,66 +90,107 @@ public class CmdlineSettings
 						{
 							throw new ArgumentException("--filename value not specified.");
 						}
-						DataFilename = param.Value[1];
+						settings.DataFilename = param.Value[1];
 						break;
 
-					case "--min":
-						if (param.Value.Count < 2)
-						{
-							throw new ArgumentException("--min value not specified.");
-						}
-						minPrime = ulong.Parse(param.Value[1]);
+					case MinPrimeCommand:
+						settings.minPrime = ParseCommandValue(param.Value, MinPrimeCommand);
 						break;
 
-					case "--max":
-						if (param.Value.Count < 2)
-						{
-							throw new ArgumentException("--max value not specified.");
-						}
-						maxPrime = ulong.Parse(param.Value[1]);
+					case MaxPrimeCommand:
+						settings.maxPrime = ParseCommandValue(param.Value, MaxPrimeCommand);
 						break;
 
-					case "--count":
-						if (param.Value.Count < 2)
-						{
-							throw new ArgumentException("--count value not specified.");
-						}
-						try
-						{
-							maxPrimeCount = int.Parse(param.Value[1]);
-							if (maxPrimeCount <= 0 || maxPrimeCount > int.MaxValue)
-								throw new ArgumentOutOfRangeException($"--count has valid range of 1 to {int.MaxValue - 1}");
-						}
-						catch (OverflowException e)
-						{
-							throw new OverflowException($"parameter --count has valid range of 1 to {int.MaxValue - 1}", e);
-						}
+					case MaxPrimeCountCommand:
+						settings.maxPrimeCount = ParseCommandValue(param.Value, MaxPrimeCountCommand);
 						break;
 
 					case "--dev":
-						DevMode = true;
+						settings.DevMode = true;
 						break;
 
 					case "--loglevel":
-						if (param.Value.Count == 2) 
-							LogLevel = (LogLevel)Enum.Parse(typeof(LogLevel), param.Value[1], true);
+						if (param.Value.Count == 2)
+							settings.LogLevel = (LogLevel)Enum.Parse(typeof(LogLevel), param.Value[1], true);
 						break;
 
 					default:
 						throw new ArgumentException($"{param.Key} is not a recognised command.");
 				}
 			}
+
+
 		}
-		catch (ArgumentException )
+		catch (ArgumentException)
 		{
-			if (LogLevel >= LogLevel.Info)
+			if (settings.LogLevel >= LogLevel.Info)
 			{
 				ConsoleDisplay.DisplayHelp();
 			}
 			throw;
 		}
+
+		return settings;
+
+		static void SetMode(ref Settings settings, Modes mode)
+		{
+			if (settings.Mode != Modes.Undefined)
+			{
+				throw new ArgumentException(ConflictingModesErrorMsg);
+			}
+			settings.Mode = mode;
+		}
+
+		static ulong ParseCommandValue(List<string> param, string CommandName)
+		{
+			if (param.Count < 2)
+			{
+				throw new ArgumentException($"Value not specified for command {CommandName}");
+			}
+			if (ulong.TryParse(param[1], NumberStyles.AllowThousands, CultureInfo.CurrentUICulture, out ulong n))
+			{
+				return n;
+			}
+			else
+			{
+				throw new ArgumentException($"Invalid number {n} specified for command {CommandName}");
+			}
+		}
+
+		static List<ulong> ParseCommandValues(List<string> param, string CommandName)
+		{
+			List<ulong> serise = new();
+			if (param.Count < 2)
+			{
+				throw new ArgumentException($"Value not specified for command {CommandName}");
+			}
+			foreach (var s in param[1..])
+			{
+				if (ulong.TryParse(s, NumberStyles.AllowThousands, CultureInfo.CurrentUICulture, out ulong n))
+				{
+					serise.Add(n);
+				}
+				else
+				{
+					throw new ArgumentException($"Invalid number {s} specified for command {CommandName}");
+				}
+			}
+			return serise;
+		}
 	}
 
+	/// <summary>
+	/// Separates the command line arguments into a dictionary of parameters and their values.
+	/// Each parameter is a key in the dictionary, and its values are stored in a list.	
+	/// </summary>
+	/// <param name="args"> 
+	/// The command line arguments passed to the program.
+	/// Each argument is expected to be a string, and parameters are expected to start with "--".
+	/// </param>
+	/// <returns>
+	/// A dictionary where the key is the parameter name (e.g., "--factor") and the value is a list of strings representing the values for that parameter.
+	/// The first value in the list is the parameter name itself, and subsequent values are the arguments associated with that parameter.
+	/// </returns>
 	public static Dictionary<string, List<string>> SeparateParams(string[] args)
 	{
 		var d = new Dictionary<string, List<string>>();

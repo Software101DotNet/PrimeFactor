@@ -18,7 +18,7 @@ public class TraceDisplay
 		if (n == null)
 			throw new ArgumentNullException(nameof(n));
 
-		string elapsedTime = ConsoleDisplay.FormatTimeSpan(n.ComputationTime);
+		string elapsedTime = string.Empty; //ConsoleDisplay.FormatTimeSpan(n.ComputationTime);
 
 		if (n.Value() <= 1)
 		{

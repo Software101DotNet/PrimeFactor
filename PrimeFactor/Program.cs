@@ -3,18 +3,22 @@
 // The use of this source code file is governed by the license outlined in the License.txt file of this project.
 // https://github.com/Software101DotNet/PrimeFactor
 
+using Microsoft.VisualBasic;
+
 namespace PrimeFactor;
 
 public class Program
 {
 	enum ExitCode : int { Success = 0, CmdLineError = 1, Exception = 2 };
 
+	static Settings settings;
+
 	static int Main(string[] args)
 	{
 		var exitCode = ExitCode.Success;
 		try
 		{
-			var settings = new CmdlineSettings(args);
+			settings = CmdlineSettings.Parse(args);
 
 			switch (settings.Mode)
 			{
@@ -31,8 +35,9 @@ public class Program
 					}
 					using (writer)
 					{
-						if (settings.LogLevel>=LogLevel.Info) {
-							Console.WriteLine($"Cache requirement will be {(settings.maxPrimeCount * sizeof(UInt64)):N0} bytes");
+						if (settings.LogLevel >= LogLevel.Info)
+						{
+							Console.WriteLine($"Cache requirement will be {settings.maxPrimeCount * sizeof(UInt64):N0} bytes");
 						}
 						var result = Prime.GeneratePrimes(writer, settings.maxPrimeCount, settings.maxPrime);
 						writer.Flush();
@@ -45,12 +50,23 @@ public class Program
 						foreach (var candidateFactor in settings.candidates)
 						{
 							var factored = new Factored(candidateFactor);
+							
 							if (factored.Factors().Count == 1)
 								Console.WriteLine($"{factored.Value()} is prime");
 							else
 								Console.WriteLine($"{factored.Value()} has prime factors {string.Join(" ", factored.Factors())}");
 						}
 					}
+					break;
+
+				case Modes.PerfectNumber:
+					throw new NotImplementedException("Perfect Number calculation will be implemented in a later version");
+
+				case Modes.GCD:
+					throw new NotImplementedException("Greatest Command Factor calculation will be implemented in a later version.");
+
+				case Modes.Benchmark:
+					Benchmark.Serial10M();
 					break;
 
 				case Modes.Version:
@@ -70,7 +86,7 @@ public class Program
 			ConsoleExtended.WriteLine($"{e.Message}", ConsoleColor.DarkRed);
 
 			if (e.InnerException != null)
-				ConsoleExtended.WriteLine(e.InnerException.Message,ConsoleColor.DarkYellow);
+				ConsoleExtended.WriteLine(e.InnerException.Message, ConsoleColor.DarkYellow);
 
 			exitCode = ExitCode.Exception;
 		}

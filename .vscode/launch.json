@@ -10,7 +10,7 @@
 			"request": "launch",
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
-			"args": ["--generate","--count","5"],
+			"args": ["--generate"],
 			"cwd": "${workspaceFolder}/PrimeFactor",
 			"stopAtEntry": true,
 			"console": "internalConsole" 
@@ -22,6 +22,17 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
 			"args": ["10731","193","91"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		},
+		{
+			"name": "--benchmark",
+			"type": "coreclr", //"dotnet",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["--benchmark"],
 			"cwd": "${workspaceFolder}/PrimeFactor",
 			"stopAtEntry": false,
 			"console": "internalConsole" 

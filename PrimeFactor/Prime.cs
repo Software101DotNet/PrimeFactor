@@ -9,38 +9,6 @@ using System.Diagnostics;
 
 namespace PrimeFactor;
 
-/// <summary>
-/// A tuple representing a number and its factors. There the number is prime, the list will be empty
-/// </summary>
-public class Factored
-{
-	public TimeSpan ComputationTime { get; }
-
-	private readonly Tuple<ulong, List<ulong>> data;
-
-	public Factored(ulong item1)
-	{
-		data = new Tuple<ulong, List<ulong>>(item1, Prime.Factor(item1, out TimeSpan ts));
-		ComputationTime = ts;
-	}
-
-	public Factored(ulong value, List<ulong> factors, TimeSpan ts)
-	{
-		data = new Tuple<ulong, List<ulong>>(value, factors);
-		ComputationTime = ts;
-	}
-
-	public ulong Value()
-	{
-		return data.Item1;
-	}
-
-	public List<ulong> Factors()
-	{
-		return data.Item2;
-	}
-}
-
 public partial class Prime
 {
 	public static IEnumerable<ulong> Primes(ulong limit = ulong.MaxValue)
@@ -173,80 +141,6 @@ public partial class Prime
 		return results;
 	}
 
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="value"></param>
-	/// <param name="computationTime"></param>
-	/// <returns>List of prime factors, or a single element of value (which is proven to be prime)</returns>
-	public static List<ulong> Factor(ulong value, out TimeSpan computationTime)
-	{
-#if statistics
-		Stopwatch stopWatch = new Stopwatch();
-		stopWatch.Start();
-#endif
-		var factors = new List<ulong>();
-		if (value >= 2)
-		{
-			var remainder = value;
-			//var r = (ulong)Math.Sqrt(remainder) + 1;
-			bool continueEvaluation = false;
-			do
-			{
-#if cached
-				foreach (var prime in Primes(remainder))
-				{
-					//Debug.Assert(prime <= remainder);
-					if (remainder % prime == 0)
-					{
-						factors.Add(prime);
-						remainder /= prime;
-						continueEvaluation = (remainder > 1);
-						break;
-					}
-				}
-#else
-				ulong i = 2;
-				if (remainder % i == 0)
-				{
-					factors.Add(i);
-					remainder /= i;
-					continueEvaluation = (remainder > 1);
-					continue;
-				}
-
-				i++;
-
-				for (; i <= remainder; i += 2)
-				{
-					if (IsPrime_TrialDivisionMethod(i))
-					{
-						if (remainder % i == 0)
-						{
-							factors.Add(i);
-							remainder /= i;
-							continueEvaluation = (remainder > 1);
-							break;
-						}
-					}
-				}
-#endif
-				if (continueEvaluation == false && remainder > 1)
-				{
-					factors.Add(remainder);
-				}
-
-			} while (continueEvaluation);
-
-		}
-
-#if statistics
-		stopWatch.Stop();
-		computationTime = stopWatch.Elapsed;
-#endif
-		return factors;
-	}
-
 	public static bool IsPrime_TrialDivisionMethod_Serial(ulong value)
 	{
 		if (value <= 1)
@@ -283,7 +177,7 @@ public partial class Prime
 
 		var r = (ulong)Math.Sqrt(value) + 1;
 
-		int degreeOfParallelism = 16;
+		int degreeOfParallelism = 16; // use Environment.ProcessorCount
 
 		ulong degreeOfParallelismLimit = ((value - 3ul) / 2ul) + 1ul;
 		if (degreeOfParallelismLimit < (ulong)degreeOfParallelism)
@@ -366,32 +260,42 @@ public partial class Prime
 	}
 #endif
 
-	// generate prime numbers with optimisation support from a cache.
-	public static UInt64[] GeneratePrimes(StreamWriter writer, int maxIndex, UInt64 maxValue)
+	// generate prime numbers with optimisation support from a prime cache.
+	public static UInt64[] GeneratePrimes(StreamWriter writer, UInt64 maxIndex = UInt32.MaxValue, UInt64 maxValue = UInt64.MaxValue)
 	{
-		if (maxIndex <= 0)
+		if (maxValue < 2)
 		{
 			return Array.Empty<ulong>();
 		}
 
+		// if maxIndex is a value that is too high for the memory of the platform, 
+		// an exception is thrown to the out most block to explain to the user the limits
 		var primes = new UInt64[maxIndex];
 
-		int primeIndex = 0;
+		UInt64 primeIndex = 0;
 		UInt64 primeCandidate = 2;
 
+		// For performance reasons, we keep a running squared value of the current prime candidate instead of calculating the square root.
 		UInt64 square = 2;
 		UInt64 squared = 4;
-		int squareIdx = 0;
+		UInt64 squareIdx = 0;
 
+		// the first prime is 2
 		writer.WriteLine($"{primeCandidate:N0}");
 		primes[primeIndex++] = primeCandidate;
 
+		// The second prime is 3. We must start the loop on odd values, as we increase by odd values after 2.
 		primeCandidate++;
 
 		do
 		{
 			bool prime = true;
-			for (var i = 0; (primes[i] <= square) && (i < primeIndex); i++)
+
+			Debug.Assert(squared >= primeCandidate, $"squared {squared} >= primeCandidate {primeCandidate}");
+
+			// check if the primeCandidate is divisible by any of the smaller prime values cached.
+			// we only need to check primes that are less than or equal to the square root of the primeCandidate.
+			for (var i = 0ul; (primes[i] <= square) && (i < primeIndex); i++)
 			{
 				if ((primeCandidate % primes[i]) == 0)
 				{
@@ -403,27 +307,32 @@ public partial class Prime
 			if (prime)
 			{
 				writer.WriteLine($"{primeCandidate:N0}");
+
+				// add the prime to the cache of primes.
 				primes[primeIndex++] = primeCandidate;
 
+				// if we have reached the limit of the cache, then
 				if (primeIndex >= maxIndex)
 					break;
-
-				while (squared < primeCandidate)
-				{
-					squareIdx++;
-					square = primes[squareIdx];
-					squared = square * square;
-				}
 			}
+
+			// increase to the next odd value
 			primeCandidate += 2;
+
+			while (squared < primeCandidate)
+			{
+				squareIdx++;
+				square = primes[squareIdx];
+				squared = square * square;
+			}
 
 		} while (primeIndex < maxIndex && primeCandidate <= maxValue);
 
 		// trim the array to the actual number of primes found
 		// this is needed if the maxValue is reached before the maxIndex is reached
-		if (primeIndex < maxIndex)
+		if (primeIndex < maxIndex && primeIndex<=int.MaxValue)
 		{
-			Array.Resize(ref primes, primeIndex);
+			Array.Resize(ref primes, (int)primeIndex);
 		}
 		return primes;
 	}

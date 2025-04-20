@@ -78,7 +78,7 @@ public class PrimeTests
 	[Fact]
 	public void IsPrimeTest_Max_Parallel()
 	{
-		const ulong testValue = ulong.MaxValue - 82;
+		const ulong testValue = ulong.MaxValue - 82; 
 		Trace.WriteLine($"Testing parallel trial division method with the prime value {testValue.ToString()}");
 		var result = Prime.IsPrime_TrialDivisionMethod(testValue);
 		Assert.True(result);
@@ -125,15 +125,13 @@ public class PrimeTests
 		}
 
 		stopWatch.Stop();
-		TimeSpan computationTime = stopWatch.Elapsed;
-		var computeTime = ConsoleDisplay.FormatTimeSpan(computationTime);
-		Trace.WriteLine($"Factor Test calculation time: {computeTime}");
+		Trace.WriteLine($"Factor Test calculation time: ".FormatTimeSpan(stopWatch.Elapsed));
 	}
 
 	private static void FactorTest_part2(ulong i)
 	{
-		var factors = Prime.Factor(i, out TimeSpan computationTime);
-		var factored = new Factored(i, factors, computationTime);
+		var factors = Factored.Factor(i);
+		var factored = new Factored(i, factors);
 		TraceDisplay.Display(factored);
 
 		Assert.NotNull(factors);
@@ -160,7 +158,7 @@ public class PrimeTests
 	public void GeneratePrimes_WithMaxValue()
 	{
 		// Arrange
-		int maxIndex = 10;
+		uint maxIndex = 10;
 		ulong maxValue = 15;
 		var expectedPrimes = new ulong[] { 2, 3, 5, 7, 11, 13 };
 
@@ -193,7 +191,7 @@ public class PrimeTests
 	public void GeneratePrimes_WithMaxIndex10_ReturnsFirst10Primes()
 	{
 		// Arrange
-		int maxIndex = 10;
+		uint maxIndex = 10;
 		ulong maxValue = ulong.MaxValue;
 		var expectedPrimes = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
 

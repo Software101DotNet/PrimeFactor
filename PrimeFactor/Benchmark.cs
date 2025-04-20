@@ -10,11 +10,12 @@ namespace PrimeFactor;
 public class Benchmark
 {
     /// Method to messuring the perform of a computer platform
-    /// MacBook Air M4 runtime 00:05:18.641
+    /// MacBook Air M4 Benchmarking 10,000,000 primes. Time to compute 14s,878ms 
+    /// Mac Mini M2P Benchmarking 10,000,000 primes. Time to compute 17s,457ms 
     public static void Serial10M()
     {
         uint limit = 10_000_000;
-        Console.WriteLine($"Benchmarking {limit:N0} primes.");
+        Console.Write($"Benchmarking {limit:N0} primes. ");
 
         // no need to write the resulting calculations to the screen or a file
         StreamWriter writer = new StreamWriter(Stream.Null);

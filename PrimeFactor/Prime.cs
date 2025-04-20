@@ -35,23 +35,6 @@ public partial class Prime
 #endif
 	}
 
-	public ulong GratestCommonFactor(List<ulong> values)
-	{
-		ulong result = 0;
-
-		foreach (var n in values)
-		{
-			//Factor(n);
-		}
-		return result;
-	}
-
-	public List<ulong> LeastCommonMultiple()
-	{
-		var result = new List<ulong>();
-
-		return result;
-	}
 
 	/// <summary>
 	/// calculates (in parallel) list of Prime values from minLimit to maxLimit
@@ -260,13 +243,15 @@ public partial class Prime
 	}
 #endif
 
-	// generate prime numbers with optimisation support from a prime cache.
+	// generate prime numbers without a prebuilt cache.
 	public static UInt64[] GeneratePrimes(StreamWriter writer, UInt64 maxIndex = UInt32.MaxValue, UInt64 maxValue = UInt64.MaxValue)
 	{
 		if (maxValue < 2)
 		{
 			return Array.Empty<ulong>();
 		}
+
+		//Console.WriteLine($"Cache requirement will be {maxIndex * sizeof(UInt64):N0} bytes");
 
 		// if maxIndex is a value that is too high for the memory of the platform, 
 		// an exception is thrown to the out most block to explain to the user the limits
@@ -289,11 +274,17 @@ public partial class Prime
 
 		do
 		{
+			while (squared < primeCandidate)
+			{
+				squareIdx++;
+				Debug.Assert(squareIdx <= primeIndex, $"squareIdx {squareIdx} <= primeIndex {primeIndex}");
+				square = primes[squareIdx];
+				squared = square * square;
+			}
+
 			bool prime = true;
 
-			Debug.Assert(squared >= primeCandidate, $"squared {squared} >= primeCandidate {primeCandidate}");
-
-			// check if the primeCandidate is divisible by any of the smaller prime values cached.
+			// check if the primeCandidate is divisible by any of the smaller prime values, cached.
 			// we only need to check primes that are less than or equal to the square root of the primeCandidate.
 			for (var i = 0ul; (primes[i] <= square) && (i < primeIndex); i++)
 			{
@@ -319,18 +310,13 @@ public partial class Prime
 			// increase to the next odd value
 			primeCandidate += 2;
 
-			while (squared < primeCandidate)
-			{
-				squareIdx++;
-				square = primes[squareIdx];
-				squared = square * square;
-			}
-
 		} while (primeIndex < maxIndex && primeCandidate <= maxValue);
+
+		writer.Flush();
 
 		// trim the array to the actual number of primes found
 		// this is needed if the maxValue is reached before the maxIndex is reached
-		if (primeIndex < maxIndex && primeIndex<=int.MaxValue)
+		if (primeIndex < maxIndex && primeIndex <= int.MaxValue)
 		{
 			Array.Resize(ref primes, (int)primeIndex);
 		}

@@ -23,24 +23,12 @@ public class Program
 			switch (settings.Mode)
 			{
 				case Modes.GeneratePrimes:
-					StreamWriter writer;
-					if (settings.DataFilename != string.Empty)
 					{
-						writer = new StreamWriter(settings.DataFilename);
-					}
-					else
-					{
-						writer = new StreamWriter(Console.OpenStandardOutput());
-						writer.AutoFlush = true;
-					}
-					using (writer)
-					{
-						if (settings.LogLevel >= LogLevel.Info)
-						{
-							Console.WriteLine($"Cache requirement will be {settings.maxPrimeCount * sizeof(UInt64):N0} bytes");
-						}
-						var result = Prime.GeneratePrimes(writer, settings.maxPrimeCount, settings.maxPrime);
-						writer.Flush();
+						using var writer = string.IsNullOrEmpty(settings.DataFilename)
+							? new StreamWriter(Console.OpenStandardOutput())
+							: new StreamWriter(settings.DataFilename);
+
+						Prime.GeneratePrimes(writer, settings.maxPrimeCount, settings.maxPrime);
 					}
 					break;
 
@@ -50,7 +38,7 @@ public class Program
 						foreach (var candidateFactor in settings.candidates)
 						{
 							var factored = new Factored(candidateFactor);
-							
+
 							if (factored.Factors().Count == 1)
 								Console.WriteLine($"{factored.Value()} is prime");
 							else

@@ -246,7 +246,7 @@ public partial class Prime
 	// generate prime numbers without a prebuilt cache.
 	public static UInt64[] GeneratePrimes(StreamWriter writer, UInt64 maxIndex = UInt32.MaxValue, UInt64 maxValue = UInt64.MaxValue)
 	{
-		if (maxValue < 2)
+		if (maxValue < 2 || maxIndex <= 0)
 		{
 			return Array.Empty<ulong>();
 		}

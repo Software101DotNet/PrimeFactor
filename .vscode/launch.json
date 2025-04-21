@@ -10,7 +10,7 @@
 			"request": "launch",
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
-			"args": ["--generate"],
+			"args": ["--generate","-max","100"],
 			"cwd": "${workspaceFolder}/PrimeFactor",
 			"stopAtEntry": true,
 			"console": "internalConsole" 

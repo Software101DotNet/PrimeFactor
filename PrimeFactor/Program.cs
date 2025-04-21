@@ -3,8 +3,6 @@
 // The use of this source code file is governed by the license outlined in the License.txt file of this project.
 // https://github.com/Software101DotNet/PrimeFactor
 
-using Microsoft.VisualBasic;
-
 namespace PrimeFactor;
 
 public class Program

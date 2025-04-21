@@ -152,7 +152,7 @@ public partial class Prime
 		if (value == 2) //the only even prime
 			return true;
 
-		if (value % 2 == 0) // all evens above 2 are composit
+		if (value % 2 == 0) // all evens above 2 are composite numbers, not prime.
 			return false;
 
 		if (value == 3)

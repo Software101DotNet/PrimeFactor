@@ -78,7 +78,7 @@ public class PrimeTests
 	[Fact]
 	public void IsPrimeTest_Max_Parallel()
 	{
-		const ulong testValue = ulong.MaxValue - 82; 
+		const ulong testValue = ulong.MaxValue - 82;
 		Trace.WriteLine($"Testing parallel trial division method with the prime value {testValue.ToString()}");
 		var result = Prime.IsPrime_TrialDivisionMethod(testValue);
 		Assert.True(result);
@@ -167,7 +167,7 @@ public class PrimeTests
 		writer.AutoFlush = true;
 
 		// Act
-		var primes = Prime.GeneratePrimes(writer, maxIndex, maxValue);
+		var primes = Prime.GeneratePrimes(writer, LogLevel.Quite, maxIndex, maxValue);
 
 		// Assert
 		Assert.Equal(expectedPrimes.Length, primes.Length);
@@ -200,7 +200,7 @@ public class PrimeTests
 		writer.AutoFlush = true;
 
 		// Act
-		var primes = Prime.GeneratePrimes(writer, maxIndex, maxValue);
+		var primes = Prime.GeneratePrimes(writer, LogLevel.Quite, maxIndex, maxValue);
 
 		// Assert
 		Assert.Equal(expectedPrimes.Length, primes.Length);

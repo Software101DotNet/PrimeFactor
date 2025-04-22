@@ -31,7 +31,7 @@ public class Benchmark
 			stopWatch.Restart();
 
 			// using a null stream as there is no need to write the resulting calculations to a screen or file.
-			Prime.GeneratePrimes(writer, maxIndex: limit);
+			Prime.GeneratePrimes(writer, LogLevel.Quite, maxIndex: limit);
 
 			stopWatch.Stop();
 			min = long.Min(stopWatch.Elapsed.Ticks, min);

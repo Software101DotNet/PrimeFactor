@@ -5,6 +5,17 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "GenCache",
+			"type": "coreclr", //"dotnet",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/GenerateCacheSource/bin/Debug/net9.0/GenerateCacheSource.dll",
+			"args": [],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		},
+		{
 			"name": "--generate",
 			"type": "coreclr", //"dotnet",
 			"request": "launch",

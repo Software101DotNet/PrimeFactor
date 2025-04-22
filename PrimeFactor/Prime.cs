@@ -198,6 +198,7 @@ public partial class Prime
 		}
 
 		return true;
+
 	}
 
 	private static bool IsPrime(ulong value, ulong limit, ulong initial, ulong inc)
@@ -244,14 +245,18 @@ public partial class Prime
 #endif
 
 	// generate prime numbers without a prebuilt cache.
-	public static UInt64[] GeneratePrimes(StreamWriter writer, UInt64 maxIndex = UInt32.MaxValue, UInt64 maxValue = UInt64.MaxValue)
+	public static UInt64[] GeneratePrimes(StreamWriter writer, LogLevel logLevel, UInt64 maxIndex = UInt32.MaxValue, UInt64 maxValue = UInt64.MaxValue, bool DevMode = false)
 	{
 		if (maxValue < 2 || maxIndex <= 0)
 		{
 			return Array.Empty<ulong>();
 		}
 
-		//Console.WriteLine($"Cache requirement will be {maxIndex * sizeof(UInt64):N0} bytes");
+		if (logLevel >= LogLevel.Info)
+		{
+			Console.WriteLine($"Cache will be {maxIndex * sizeof(UInt64):N0} bytes");
+			Console.WriteLine($"Max Prime Value will be {maxValue:N0}");
+		}
 
 		// if maxIndex is a value that is too high for the memory of the platform, 
 		// an exception is thrown to the out most block to explain to the user the limits
@@ -266,7 +271,7 @@ public partial class Prime
 		UInt64 squareIdx = 0;
 
 		// the first prime is 2
-		writer.WriteLine($"{primeCandidate:N0}");
+		WriteValue(writer, DevMode, primeIndex, primeCandidate);
 		primes[primeIndex++] = primeCandidate;
 
 		// The second prime is 3. We must start the loop on odd values, as we increase by odd values after 2.
@@ -297,7 +302,7 @@ public partial class Prime
 
 			if (prime)
 			{
-				writer.WriteLine($"{primeCandidate:N0}");
+				WriteValue(writer, DevMode, primeIndex, primeCandidate);
 
 				// add the prime to the cache of primes.
 				primes[primeIndex++] = primeCandidate;
@@ -321,5 +326,21 @@ public partial class Prime
 			Array.Resize(ref primes, (int)primeIndex);
 		}
 		return primes;
+
+
+		// Write the prime values to the output stream in the software development format (for use in source code) or in human readable format.
+		static void WriteValue(StreamWriter writer, bool DevMode, ulong primeIndex, ulong primeCandidate)
+		{
+			if (DevMode)
+			{
+				writer.Write($"{primeCandidate},");
+				if (primeIndex % 32 == 31)
+					writer.WriteLine();
+			}
+			else
+			{
+				writer.WriteLine($"{primeCandidate:N0}");
+			}
+		}
 	}
 }

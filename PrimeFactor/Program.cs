@@ -26,7 +26,7 @@ public class Program
 							? new StreamWriter(Console.OpenStandardOutput())
 							: new StreamWriter(settings.DataFilename);
 
-						Prime.GeneratePrimes(writer, settings.maxPrimeCount, settings.maxPrime);
+						Prime.GeneratePrimes(writer, settings.LogLevel, settings.maxPrimeCount, settings.maxPrime, settings.DevMode);
 					}
 					break;
 

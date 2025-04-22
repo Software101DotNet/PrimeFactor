@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 
 # Test Results folder
 [Rr]esults/
+
+#Generated Data
+[Gg]eneratedData

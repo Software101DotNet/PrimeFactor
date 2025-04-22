@@ -9,7 +9,7 @@ public class PrimeCacheTest
 	public void GetBitValue_ValidIndex_Bit0()
 	{
 		// Arrange
-		int bitIndex = 0; // First bit of the first ulong
+		ulong bitIndex = 0;     // prime candidate value 3, is prime
 		bool expected = true;
 
 		// Act
@@ -24,8 +24,8 @@ public class PrimeCacheTest
 	public void GetBitValue_ValidIndex_Bit1()
 	{
 		// Arrange
-		int bitIndex = 1; // Second bit of the first ulong
-		bool expected = false; // Second bit is 0 in 0x96DD96DD96DD96DD
+		ulong bitIndex = 1; // prime candidate value 5, is prime
+		bool expected = true;
 
 		// Act
 		bool? result = PrimeCache.GetBitValue(bitIndex);
@@ -36,23 +36,25 @@ public class PrimeCacheTest
 	}
 
 	[Fact]
-	public void GetBitValue_NegativeIndex()
+	public void GetBitValue_ValidIndex_Bit3()
 	{
 		// Arrange
-		int bitIndex = -1;
+		ulong bitIndex = 3; // prime candidate value 9, is not prime
+		bool expected = false;
 
 		// Act
 		bool? result = PrimeCache.GetBitValue(bitIndex);
 
 		// Assert
-		Assert.Null(result);
+		Assert.NotNull(result);
+		Assert.Equal(expected, result);
 	}
 
 	[Fact]
 	public void GetBitValue_OutOfBoundsIndex()
 	{
 		// Arrange
-		int bitIndex = PrimeCache.cache.Length * 64; // Out of bounds
+		ulong bitIndex = (ulong)PrimeCache.cache.Length * 64; // Out of bounds
 
 		// Act
 		bool? result = PrimeCache.GetBitValue(bitIndex);
@@ -62,17 +64,43 @@ public class PrimeCacheTest
 	}
 
 	[Fact]
-	public void GetBitValue_LastValidIndex()
+	public void IsPrime_0to7()
 	{
-		// Arrange
-		int bitIndex = PrimeCache.cache.Length * 64 - 1; // Last valid bit
-		bool expected = true; // Last bit of 0xFFFFFFFFFFFFFFFF is 1
+		bool? result = PrimeCache.IsPrime(0);
+		Assert.Equal(false, result);
 
-		// Act
-		bool? result = PrimeCache.GetBitValue(bitIndex);
+		result = PrimeCache.IsPrime(1);
+		Assert.Equal(false, result);
 
-		// Assert
-		Assert.NotNull(result);
-		Assert.Equal(expected, result);
+		result = PrimeCache.IsPrime(2);
+		Assert.Equal(true, result);
+
+		result = PrimeCache.IsPrime(3);
+		Assert.Equal(true, result);
+
+		result = PrimeCache.IsPrime(4);
+		Assert.Equal(false, result);
+
+		result = PrimeCache.IsPrime(5);
+		Assert.Equal(true, result);
+
+		result = PrimeCache.IsPrime(6);
+		Assert.Equal(false, result);
+
+		result = PrimeCache.IsPrime(7);
+		Assert.Equal(true, result);
+	}
+
+	[Fact]
+	public void IsPrime_0to4000()
+	{
+		for (ulong i = 0; i <= 4000; i++)
+		{
+			var expected = Prime.IsPrime_TrialDivisionMethod_Serial(i);
+			bool? result = PrimeCache.IsPrime(i);
+			Assert.NotNull(result);
+			Assert.Equal(expected, result);
+		}
+
 	}
 }

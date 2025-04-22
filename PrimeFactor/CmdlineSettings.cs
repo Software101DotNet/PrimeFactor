@@ -4,7 +4,6 @@
 // https://github.com/Software101DotNet/PrimeFactor
 
 using System.Globalization;
-using System.Runtime.CompilerServices;
 
 namespace PrimeFactor;
 
@@ -74,7 +73,7 @@ public static class CmdlineSettings
 					case defaultCommand:
 					case "--factor":
 						SetMode(ref settings, Modes.Factor);
-						settings.candidates = ParseCommandValues(param.Value,"--factor");
+						settings.candidates = ParseCommandValues(param.Value, "--factor");
 						break;
 
 					case "--generate":

@@ -3,14 +3,100 @@
 // The use of this source code file is governed by the license outlined in the License.txt file of this project.
 // https://github.com/Software101DotNet/PrimeFactor
 
-namespace GenerateCacheSource;
+using System.Globalization;
 
+namespace GenerateCacheSource;
 
 // This program is to generate the prime cache class data during the software development of PrimeFactor
 public class Program
 {
 	// generate 64bit Hex values of primality for a cache of odd numbers from 3 to 2^32.
-	public static void GeneratePrimeCacheValues(StreamWriter writer, UInt64 maxValue = UInt32.MaxValue)
+	public static void GeneratePrimeCacheValues(StreamWriter writer, UInt64 requestedMaxValue = UInt32.MaxValue)
+	{
+		if (requestedMaxValue < (2 + 128))
+		{
+			throw new ArgumentOutOfRangeException(nameof(requestedMaxValue), $"maxValue {requestedMaxValue} must be >= 2+ n multiples of 128.");
+		}
+
+		UInt64 primeCandidate = 3;
+
+		ulong qwords = (requestedMaxValue - 3) / 128;
+		ulong maxValue = 3 + ((qwords * 128) - 1);
+
+		Console.WriteLine($"generating cache for values 3 to {maxValue}");
+
+		// For performance reasons, we keep a running squared value of the current prime candidate instead of calculating the square root.
+		UInt64 square = 3;
+		UInt64 squared = 9;
+
+		UInt64 qword = 0;
+		UInt64 activeBit = 1;
+
+		int newline = 0;
+
+		do
+		{
+			while (squared <= primeCandidate)
+			{
+				square += 2;
+				squared = square * square;
+			}
+
+			bool prime = true;  // assume primeCandidate is prime until a divider is found.
+
+			for (var i = 3ul; i < primeCandidate && i < square; i += 2)
+			{
+				if ((primeCandidate % i) == 0)
+				{
+					prime = false;
+					break;
+				}
+			}
+
+			// if the primeCandidate value is prime, then set the bit true for the active bit in the qword.
+			// for all non-primes, the bit remains false. 
+			if (prime)
+			{
+				qword |= activeBit;
+			}
+
+			activeBit <<= 1;
+
+			// when the active bit is shifted off the end, then the value of the qword is complete
+			if (activeBit == 0)
+			{
+				// all qwords have a comma except the very last qword
+				if (primeCandidate <= (maxValue - 128))
+					writer.Write($"0x{qword:X16}UL,");
+				else
+					writer.Write($"0x{qword:X16}UL");
+
+				// insert a newline every 8 qwords
+				if (++newline >= 8)
+				{
+					newline = 0;
+					writer.WriteLine();
+				}
+
+				// reset the qword value and the active bit
+				qword = 0;
+				activeBit = 1;
+			}
+
+
+			// increase to the next odd value
+			primeCandidate += 2;
+
+		} while (primeCandidate <= maxValue);
+
+		writer.WriteLine();
+		writer.Flush();
+
+		return;
+	}
+
+#if nop
+	public static void GenerateQWord(int Id)
 	{
 		if (maxValue < 2)
 		{
@@ -61,9 +147,9 @@ public class Program
 			{
 				// all qwords have a comma except the very last qword
 				if (primeCandidate <= (maxValue - 64))
-					writer.Write($"{qword:X16},");
+					writer.Write($"0x{qword:X16}UL,");
 				else
-					writer.Write($"{qword:X16}");
+					writer.Write($"0x{qword:X16}UL");
 
 				// insert a newline every 8 qwords
 				if (++newline >= 8)
@@ -88,15 +174,26 @@ public class Program
 
 		return;
 	}
-
+#endif
 
 	enum ExitCode : int { Success = 0, CmdLineError = 1, Exception = 2 };
 
 	static int Main(string[] args)
 	{
 		var exitCode = ExitCode.Success;
+		UInt64 maxValue = UInt32.MaxValue + 2UL;
+		if (args.Length >= 1)
+		{
+			if (ulong.TryParse(args[0], NumberStyles.AllowThousands, CultureInfo.CurrentUICulture, out ulong n))
+			{
+				maxValue = n;
+			}
+			else
+			{
+				throw new ArgumentException($"Invalid value for maxValue: {args[0]}");
+			}
+		}
 
-		//UInt64 maxPrimeCount = 64 * 101;  // 64bit *8 = 512 bits -> cache result of values from 3 to (2*512)+3 = 1,027
 		string filename = "result.txt";
 
 		try
@@ -105,7 +202,7 @@ public class Program
 				? new StreamWriter(Console.OpenStandardOutput())
 				: new StreamWriter(filename);
 
-			GeneratePrimeCacheValues(writer);
+			GeneratePrimeCacheValues(writer, maxValue);
 		}
 		catch (Exception e)
 		{

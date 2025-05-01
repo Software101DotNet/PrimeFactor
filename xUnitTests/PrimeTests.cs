@@ -80,7 +80,7 @@ public class PrimeTests
 	[Fact]
 	public void IsPrimeTest_UInt64_MaxPrime()
 	{
-		const ulong testValue = ulong.MaxValue - 82; // largest prime in a 2^64 
+		const ulong testValue = ulong.MaxValue - 82; // largest prime that can be stored in a 2^64 type 
 		ulong squareRoot = 1 + (ulong)Math.Sqrt(testValue);
 
 		Stopwatch stopWatch = new Stopwatch();
@@ -155,11 +155,9 @@ public class PrimeTests
 	}
 
 	[Fact]
-	public void GeneratePrimes_WithMaxValue()
+	public void GeneratePrimes_WithMaxValues()
 	{
 		// Arrange
-		uint maxIndex = 10;
-		ulong maxValue = 15;
 		var expectedPrimes = new ulong[] { 2, 3, 5, 7, 11, 13 };
 
 		using var memoryStream = new MemoryStream();
@@ -167,7 +165,7 @@ public class PrimeTests
 		writer.AutoFlush = true;
 
 		// Act
-		var primes = Prime.GeneratePrimes(writer, maxIndex, maxValue);
+		var primes = Prime.GeneratePrimes(writer, maxIndex: 100, maxValue: 14);
 
 		// Assert
 		Assert.Equal(expectedPrimes.Length, primes.Length);
@@ -188,11 +186,41 @@ public class PrimeTests
 	}
 
 	[Fact]
-	public void GeneratePrimes_WithMaxIndex10_ReturnsFirst10Primes()
+	public void GeneratePrimes_WithMaxPrime25()
 	{
 		// Arrange
-		uint maxIndex = 10;
-		ulong maxValue = ulong.MaxValue;
+		var expectedPrimes = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
+
+		using var memoryStream = new MemoryStream();
+		using var writer = new StreamWriter(memoryStream);
+		writer.AutoFlush = true;
+
+		// Act
+		var primes = Prime.GeneratePrimes(writer, maxValue: 25);
+
+		// Assert
+		Assert.Equal(expectedPrimes.Length, primes.Length);
+		for (int i = 0; i < expectedPrimes.Length; i++)
+		{
+			Assert.Equal(expectedPrimes[i], primes[i]);
+		}
+
+		// Optional: Check the written data
+		memoryStream.Position = 0;
+		using var reader = new StreamReader(memoryStream);
+		string output = reader.ReadToEnd();
+
+		foreach (var prime in expectedPrimes)
+		{
+			Assert.Contains(prime.ToString("N0"), output);
+		}
+	}
+
+	[Fact]
+	public void GeneratePrimes_WithMaxIndex10()
+	{
+		// Arrange
+
 		var expectedPrimes = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
 
 		using var memoryStream = new MemoryStream();
@@ -200,7 +228,7 @@ public class PrimeTests
 		writer.AutoFlush = true;
 
 		// Act
-		var primes = Prime.GeneratePrimes(writer, maxIndex, maxValue);
+		var primes = Prime.GeneratePrimes(writer, maxIndex: (ulong)expectedPrimes.Length);
 
 		// Assert
 		Assert.Equal(expectedPrimes.Length, primes.Length);
@@ -221,13 +249,13 @@ public class PrimeTests
 	}
 
 	[Fact]
-	public void GeneratePrimes_WithMaxIndex0_ReturnsEmptyArray()
+	public void GeneratePrimes_WithMaxIndex0()
 	{
 		using var memoryStream = new MemoryStream();
 		using var writer = new StreamWriter(memoryStream);
 		writer.AutoFlush = true;
 
-		var primes = Prime.GeneratePrimes(writer, 0, 100);
+		var primes = Prime.GeneratePrimes(writer, 0);
 
 		Assert.Empty(primes);
 	}

@@ -180,12 +180,20 @@ public class Prime
 
 	// Generates a series of prime numbers without a prebuilt cache.
 	// The length of the series is determinied by maxIndex or maxValue depending which is reached first.
-	public static UInt64[] GeneratePrimes(StreamWriter writer, UInt64 maxIndex = UInt32.MaxValue, UInt64 maxValue = UInt64.MaxValue)
+	public static UInt64[] GeneratePrimes(StreamWriter writer, UInt64 maxIndex = 0, UInt64 maxValue = 0)
 	{
-		if (maxValue < 2 || maxIndex <= 0)
+		if (maxValue < 2 && maxIndex <= 0)
 		{
 			return Array.Empty<ulong>();
 		}
+
+		// At this point, either maxIndex or maxValue will have been supplied with a positive value
+		// If maxIndex has been given as zero, provision the cache with an estimated maximum number of primes based on maxValue
+		// If maxValue has been given as zero, assign it the theoretical maximum value to let maxIndex become the limiting value.
+		if (maxIndex <= 0)
+			maxIndex = maxValue / 2;
+		else if (maxValue <= 0)
+			maxValue = UInt64.MaxValue;
 
 		// if maxIndex is a value that is too high for the memory of the platform, 
 		// an exception is thrown to the out most block to explain to the user the limits
@@ -200,10 +208,10 @@ public class Prime
 		UInt64 squareIdx = 0;
 
 		// the first prime is 2
-		writer.WriteLine($"{primeCandidate:N0}");
+		writer.Write($"{primeCandidate:N0}");
 		primes[primeIndex++] = primeCandidate;
 
-		// The second prime is 3. We must start the loop on odd values, as we increase by odd values after 2.
+		// The second prime is 3. Sets main loop to start and iterate on odd values.
 		primeCandidate++;
 
 		do
@@ -232,14 +240,10 @@ public class Prime
 
 			if (prime)
 			{
-				writer.WriteLine($"{primeCandidate:N0}");
+				writer.Write($", {primeCandidate:N0}");
 
 				// add the prime to the cache of primes.
 				primes[primeIndex++] = primeCandidate;
-
-				// if we have reached the limit of the cache, then
-				if (primeIndex >= maxIndex)
-					break;
 			}
 
 			// increase to the next odd value
@@ -247,6 +251,7 @@ public class Prime
 
 		} while (primeIndex < maxIndex && primeCandidate <= maxValue);
 
+		writer.WriteLine();
 		writer.Flush();
 
 		// trim the array to the actual number of primes found

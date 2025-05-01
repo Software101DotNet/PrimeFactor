@@ -70,7 +70,6 @@ public class FactorTests
 
 		// assert that the product of the factors are equal to the test value.
 		Assert.Equal(testValue, product);
-
 	}
 
 }

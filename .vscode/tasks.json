@@ -8,8 +8,8 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"problemMatcher": [],
-			"label": "dotnet: build"
+			"problemMatcher": ["$msCompile"],
+			"label": "Build: .NET"
 		}
 	]
 }

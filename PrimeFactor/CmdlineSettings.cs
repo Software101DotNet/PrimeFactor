@@ -33,9 +33,9 @@ public struct Settings
 	// List of candidates to factor. 
 	public List<ulong> candidates { get; set; } = new List<ulong>();
 
-	public ulong maxPrime { get; set; } = ulong.MaxValue;
+	public ulong maxPrime { get; set; } = 100; // the default max value of a series of generate primes
 	public ulong minPrime { get; set; } = 1;
-	public ulong maxPrimeCount { get; set; } = Int32.MaxValue / 2; // the upper limit of the memory cache of generated primes
+	public ulong maxPrimeCount { get; set; } = 100; // the default maximum limit of the number of primes to generate or cache
 }
 
 public static class CmdlineSettings
@@ -74,7 +74,7 @@ public static class CmdlineSettings
 					case defaultCommand:
 					case "--factor":
 						SetMode(ref settings, Modes.Factor);
-						settings.candidates = ParseCommandValues(param.Value,"--factor");
+						settings.candidates = ParseCommandValues(param.Value, "--factor");
 						break;
 
 					case "--generate":

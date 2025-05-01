@@ -52,7 +52,8 @@ public class Program
 					throw new NotImplementedException("Greatest Command Factor calculation will be implemented in a later version.");
 
 				case Modes.Benchmark:
-					Benchmark.Serial10M();
+					Benchmark.SquareRoot();
+					//Benchmark.Serial10M();
 					break;
 
 				case Modes.Version:

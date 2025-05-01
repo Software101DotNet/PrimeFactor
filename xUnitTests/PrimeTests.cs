@@ -3,7 +3,6 @@
 // The use of this source code file is governed by the license outlined in the License.txt file of this project.
 // https://github.com/Software101DotNet/PrimeFactor
 
-#define statistics
 
 using System.Diagnostics;
 
@@ -11,146 +10,147 @@ namespace PrimeFactor.Tests;
 
 public class PrimeTests
 {
-#if cached
-		[Fact]
-		public void IsPrime()
+	[Fact]
+	public void IsPrimeTest_Enumerable()
+	{
+		// Arrange
+		int[] primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251 };
+
+		// Act
+		var primeIndex = 0;
+		foreach (var prime in Prime.Primes((ulong)primes.Length))
 		{
-			for (ulong i = 0; i <= 250000; i++)
-			{
-				var result1 = Prime.IsPrime_TrialDivisionMethod(i);
-				var result2 = Prime.IsPrime_TrialDivisionMethodCached(i);
-				Assert.AreEqual(result1, result2);
-			}
+			// Assert
+			Assert.Equal(prime, (ulong)primes[primeIndex++]);
 		}
-#endif
+	}
 
 	[Fact]
 	public void IsPrimeTest_Value0()
 	{
-		var result = Prime.IsPrime_TrialDivisionMethod(0uL);
+		var result = Prime.IsPrime(0uL);
 		Assert.False(result);
 	}
 
 	[Fact]
 	public void IsPrimeTest_Value1()
 	{
-		var result = Prime.IsPrime_TrialDivisionMethod(1uL);
+		var result = Prime.IsPrime(1uL);
 		Assert.False(result);
 	}
 
 	[Fact]
 	public void IsPrimeTest_Value2()
 	{
-		var result = Prime.IsPrime_TrialDivisionMethod(2uL);
+		var result = Prime.IsPrime(2uL);
 		Assert.True(result);
 	}
 
 	[Fact]
 	public void IsPrimeTest_Value3()
 	{
-		var result = Prime.IsPrime_TrialDivisionMethod(3uL);
+		var result = Prime.IsPrime(3uL);
 		Assert.True(result);
 	}
 
 	[Fact]
 	public void IsPrimeTest_Value4()
 	{
-		var result = Prime.IsPrime_TrialDivisionMethod(4uL);
+		var result = Prime.IsPrime(4uL);
 		Assert.False(result);
 	}
 
 	[Fact]
-	public void IsPrimeTest_Value13()
+	public void IsPrimeTest_SmallValues()
 	{
-		var result = Prime.IsPrime_TrialDivisionMethod(13uL);
+		bool[] isPrime = new bool[256];
+
+		// initialise the test results array with all the primes in the number range 0 to 255
+		int[] primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251 };
+		foreach (var p in primes)
+			isPrime[p] = true;
+
+		for (int i = 0; i < isPrime.Length; i++)
+		{
+			var actual = Prime.IsPrime((ulong)i);
+			Assert.Equal(isPrime[i], actual);
+		}
+	}
+
+	[Fact]
+	public void IsPrimeTest_UInt64_MaxPrime()
+	{
+		const ulong testValue = ulong.MaxValue - 82; // largest prime in a 2^64 
+		ulong squareRoot = 1 + (ulong)Math.Sqrt(testValue);
+
+		Stopwatch stopWatch = new Stopwatch();
+
+		stopWatch.Restart();
+		var result = Prime.IsPrime(testValue);
+		stopWatch.Stop();
+		Trace.WriteLine($"IsPrime({testValue})={result} Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
+		Assert.True(result);
+
+		stopWatch.Restart();
+		result = Prime.IsPrime_Serial(testValue, squareRoot);
+		stopWatch.Stop();
+		Trace.WriteLine($"IsPrimeSerial({testValue})={result} Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
+		Assert.True(result);
+
+		stopWatch.Restart();
+		result = Prime.IsPrime_Parallel(testValue, squareRoot);
+		stopWatch.Stop();
+		Trace.WriteLine($"IsPrimeParallel({testValue})={result} Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
 		Assert.True(result);
 	}
 
 	[Fact]
-	public void IsPrimeTest_Max_Serial()
+	public void IsPrimeTest_Serial_UInt64_Max()
 	{
-		const ulong testValue = ulong.MaxValue - 82;
-		Trace.WriteLine($"Testing serial trial division method with the prime value {testValue.ToString()}");
-		var result = Prime.IsPrime_TrialDivisionMethod_Serial(testValue);
-		Assert.True(result);
-	}
+		const ulong testValue = ulong.MaxValue; // value is not prime
+		ulong squareRoot = 1 + (ulong)Math.Sqrt(testValue);
 
-	[Fact]
-	public void IsPrimeTest_Max_Parallel()
-	{
-		const ulong testValue = ulong.MaxValue - 82; 
-		Trace.WriteLine($"Testing parallel trial division method with the prime value {testValue.ToString()}");
-		var result = Prime.IsPrime_TrialDivisionMethod(testValue);
-		Assert.True(result);
-	}
+		Stopwatch stopWatch = new Stopwatch();
+		stopWatch.Restart();
+		var result = Prime.IsPrime_Serial(testValue, squareRoot);
+		stopWatch.Stop();
 
-	[Fact]
-	public void IsPrimeTest_ValueUlongMax_Serial()
-	{
-		const ulong testValue = ulong.MaxValue;
-		Trace.WriteLine($"Testing serial trial division method with the composit value {testValue.ToString()}");
-		var result = Prime.IsPrime_TrialDivisionMethod_Serial(testValue);
 		Assert.False(result);
+
+		Trace.WriteLine($"{result} Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
 	}
 
 	[Fact]
-	public void IsPrimeTest_ValueUlongMax_Parallel()
+	public void IsPrimeTest_Parallel_UInt64_Max()
 	{
-		const ulong testValue = ulong.MaxValue;
-		Trace.WriteLine($"Testing parallel trial division method with the composit value {testValue.ToString()}");
-		var result = Prime.IsPrime_TrialDivisionMethod(testValue);
+		const ulong testValue = ulong.MaxValue; // value is not prime
+		ulong squareRoot = 1 + (ulong)Math.Sqrt(testValue);
+
+		Stopwatch stopWatch = new Stopwatch();
+		stopWatch.Restart();
+		var result = Prime.IsPrime_Parallel(testValue, squareRoot);
+		stopWatch.Stop();
+
 		Assert.False(result);
+
+		Trace.WriteLine($"{result} Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
 	}
 
-
 	[Fact]
-	public void FactorTest()
+	public void IsPrimeTest_TimeTop100()
 	{
 		Stopwatch stopWatch = new Stopwatch();
-		stopWatch.Start();
 
-		FactorTest_part2(0);
+		ulong threshold = 1_000_000_000_000;
 
-		ulong limit = 10;
-		ulong inc = 1;
-
-		for (var j = 1; j <= 6; j++)
+		for (ulong candidate = threshold - 21; candidate < threshold + 50; candidate += 2)
 		{
-			limit *= 10;
-			inc *= 10;
-			for (ulong i = 1 + inc; i < limit; i += inc)
-			{
-				FactorTest_part2(i);
-			}
-		}
+			Trace.Write($"Prime testing {candidate}: ");
 
-		stopWatch.Stop();
-		Trace.WriteLine($"Factor Test calculation time: ".FormatTimeSpan(stopWatch.Elapsed));
-	}
-
-	private static void FactorTest_part2(ulong i)
-	{
-		var factors = Factored.Factor(i);
-		var factored = new Factored(i, factors);
-		TraceDisplay.Display(factored);
-
-		Assert.NotNull(factors);
-		if (i >= 2)
-		{
-			Assert.True(factors.Count >= 1);
-
-			var sum = 1ul;
-			foreach (var factor in factors)
-			{
-				Assert.True(Prime.IsPrime_TrialDivisionMethod_Serial(factor));
-				sum *= factor;
-			}
-
-			Assert.Equal(i, sum);
-		}
-		else
-		{
-			Assert.True(factors.Count == 0);
+			stopWatch.Restart();
+			var pResult = Prime.IsPrime(candidate);
+			stopWatch.Stop();
+			Trace.WriteLine($"{pResult} Time to compute ".FormatTimeSpan(stopWatch.Elapsed));
 		}
 	}
 

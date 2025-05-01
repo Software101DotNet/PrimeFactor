@@ -13,11 +13,31 @@ public class MathTests
 	[Fact]
 	public void Test_FastSquareRoot()
 	{
-		for (UInt64 i = 1_000_000_000; i > 10; i /= 3)
+		for (UInt64 i = UInt32.MaxValue; i >= 2; i /= 3)
 		{
-			var actual = Primes.FastSquareRoot(i);
-			var expected = (UInt64)(Math.Sqrt(i));
-			Assert.True(actual == expected);
+			var actual = Prime.FastSquareRoot(i);
+
+			var expectedFloor = (UInt64)(Math.Sqrt(i));
+			var expectedCeiling = expectedFloor + 1;
+
+			Assert.True(actual >= expectedFloor);
+			Assert.True(actual <= expectedCeiling);
 		}
 	}
+
+	[Fact]
+	public void Test_IntegerSquareRoot()
+	{
+		for (UInt64 i = UInt32.MaxValue; i >= 2; i /= 3)
+		{
+			var actual = Prime.IntegerSquareRoot(i);
+
+			var expectedFloor = (UInt64)(Math.Sqrt(i));
+			var expectedCeiling = expectedFloor + 1;
+
+			Assert.True(actual >= expectedFloor);
+			Assert.True(actual <= expectedCeiling);
+		}
+	}
+
 }

@@ -39,59 +39,26 @@ public class Factored
 	public static List<ulong> Factor(ulong value)
 	{
 		var factors = new List<ulong>();
-		if (value >= 2)
+		if (value < 2)
+			return factors;
+
+		ulong remainder = value;
+
+		foreach (var factor in Prime.Primes(value))
 		{
-			var remainder = value;
-			//var r = (ulong)Math.Sqrt(remainder) + 1;
-			bool continueEvaluation = false;
-			do
+			// sometimes a factor value is used more than once, such as 45 = 3*3*5 
+			while (remainder % factor == 0)
 			{
-#if cached
-				foreach (var prime in Primes(remainder))
-				{
-					//Debug.Assert(prime <= remainder);
-					if (remainder % prime == 0)
-					{
-						factors.Add(prime);
-						remainder /= prime;
-						continueEvaluation = (remainder > 1);
-						break;
-					}
-				}
-#else
-				ulong i = 2;
-				if (remainder % i == 0)
-				{
-					factors.Add(i);
-					remainder /= i;
-					continueEvaluation = (remainder > 1);
-					continue;
-				}
-
-				i++;
-
-				for (; i <= remainder; i += 2)
-				{
-					if (Prime.IsPrime_TrialDivisionMethod(i))
-					{
-						if (remainder % i == 0)
-						{
-							factors.Add(i);
-							remainder /= i;
-							continueEvaluation = (remainder > 1);
-							break;
-						}
-					}
-				}
-#endif
-				if (continueEvaluation == false && remainder > 1)
-				{
-					factors.Add(remainder);
-				}
-
-			} while (continueEvaluation);
-
+				factors.Add(factor);
+				remainder /= factor;
+				if (remainder <= 1)
+					return factors;
+			}
 		}
+
+		// the value is prime, so return it as the only factor
+		if (remainder > 1 && factors.Count <= 0)
+			factors.Add(value);
 
 		return factors;
 	}

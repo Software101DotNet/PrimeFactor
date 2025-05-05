@@ -14,7 +14,7 @@ public class FactorTests
 	public void FactorTest()
 	{
 		// test a series of values to be factorised 
-		for (ulong testValue = 0; testValue <= 100_000; testValue += 3)
+		for (ulong testValue = 0; testValue <= 1000; testValue++)
 		{
 			FactorTest_part2(testValue);
 		}
@@ -26,8 +26,9 @@ public class FactorTests
 		var factors = Factored.Factor(testValue);
 		Assert.NotNull(factors);
 
-		if (testValue < 2)
+		if (testValue <= 1)
 		{
+			//  0,1 are not prime or have integer factors, so factors should be an empty list.
 			Assert.True(factors.Count == 0);
 		}
 		else

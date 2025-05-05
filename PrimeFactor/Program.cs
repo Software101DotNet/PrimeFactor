@@ -37,7 +37,9 @@ public class Program
 						{
 							var factored = new Factored(candidateFactor);
 
-							if (factored.Factors().Count == 1)
+							if (factored.Factors().Count == 0)
+								Console.WriteLine($"{factored.Value()} is neither prime nor composite");
+							else if (factored.Factors().Count == 1)
 								Console.WriteLine($"{factored.Value()} is prime");
 							else
 								Console.WriteLine($"{factored.Value()} has prime factors {string.Join(" ", factored.Factors())}");

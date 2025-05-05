@@ -21,7 +21,7 @@ public class Prime
 		if (primeCandidate % 2 == 0)
 			return false;   // value is not prime because is have a factor of value 2
 
-		ulong parallelThreshhold = 1_000_001; // value must be odd.
+		ulong parallelThreshhold = 1_001; // value must be odd.
 		ulong squareRoot = 1 + (ulong)Math.Sqrt(primeCandidate);
 
 		// only employ parallel tasks over a given threshold due task overhead.
@@ -103,17 +103,13 @@ public class Prime
 
 		static bool HasFactor(ulong primeCandidate, ulong firstValue, ulong lastValue, CancellationToken token)
 		{
-			if (token.IsCancellationRequested)
-				return false;
+			Debug.Assert(firstValue % 2 != 0);
 
-			if (firstValue % 2 == 0)
-				throw new ArgumentException($"Testing for factors only on odd values but given range started on an even value {firstValue}");
-
-			for (ulong i = firstValue; i <= lastValue; i += 2)
+			for (ulong i = firstValue; i <= lastValue && !token.IsCancellationRequested; i += 2)
 				if (primeCandidate % i == 0)
 					return true;    // found a factor
 
-			return false; // no factors found in the range firstValue ... lastValue
+			return false; // no factors found in the range firstValue ... lastValue, or task cancelled.
 		}
 	}
 
@@ -261,49 +257,5 @@ public class Prime
 			Array.Resize(ref primes, (int)primeIndex);
 		}
 		return primes;
-	}
-
-	// faster? square root function for integer maths than using (ulong)Math.Sqrt(value)
-	public static UInt64 FastSquareRoot(UInt64 value)
-	{
-		if (value <= 1)
-			return value;
-
-		// Initial guess: half of the value (or any heuristic)
-		UInt64 guess = value / 2;
-
-		while (true)
-		{
-			UInt64 nextGuess = (guess + value / guess) / 2;
-
-			// Stop if the guesses stabilize
-			if (nextGuess >= guess)
-				return guess;
-
-			guess = nextGuess;
-		}
-	}
-
-	// An integer square root function for use in a Primality test.
-	// divide is a more expensive CPU instruction than multiple.
-	// This function returns an approximate square root of the given value
-	// It is guaranteed to return an integer that is at least equal to or greater 
-	// than the correct actual floating-point equivalent, at considerably fewer CPU cycles.  
-	public static UInt64 IntegerSquareRoot(UInt64 value)
-	{
-		if (value <= 2)
-			return 1;
-		if (value == 3)
-			return 2;
-
-		UInt64 squareRoot = 2;
-		UInt64 square = 4;
-
-		while (square < value)
-		{
-			squareRoot++;
-			square = squareRoot * squareRoot;
-		}
-		return squareRoot;
 	}
 }

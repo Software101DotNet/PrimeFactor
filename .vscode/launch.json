@@ -43,7 +43,7 @@
 			"request": "launch",
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
-			"args": ["--factor","193","931"],
+			"args": ["4,294"],
 			"cwd": "${workspaceFolder}/PrimeFactor",
 			"stopAtEntry": false,
 			"console": "internalConsole" 

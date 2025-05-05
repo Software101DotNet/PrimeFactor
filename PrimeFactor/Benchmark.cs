@@ -43,44 +43,4 @@ public class Benchmark
 		var maxTS = new TimeSpan(max);
 		Console.WriteLine($"Time to compute ".FormatTimeSpan(minTS) + "~ ".FormatTimeSpan(maxTS));
 	}
-
-	public static void SquareRoot()
-	{
-		Stopwatch stopWatch = new Stopwatch();
-
-		Console.Write($"Benchmarking Math.Sqrt()");
-		long runs = 0;
-		stopWatch.Restart();
-		for (UInt64 i = UInt64.MaxValue; i >= 10; i /= 3)
-		{
-			var actual = (UInt64)(Math.Sqrt(i));
-			runs++;
-		}
-		stopWatch.Stop();
-		Console.WriteLine($" Time to compute {runs} runs ".FormatTimeSpan(stopWatch.Elapsed));
-
-
-		Console.Write($"Benchmarking FastSquareRoot()");
-		runs = 0;
-		stopWatch.Restart();
-		for (UInt64 i = UInt64.MaxValue; i >= 10; i /= 3)
-		{
-			var actual = Prime.FastSquareRoot(i);
-			runs++;
-		}
-		stopWatch.Stop();
-		Console.WriteLine($" Time to compute {runs} runs ".FormatTimeSpan(stopWatch.Elapsed));
-
-
-		Console.Write($"Benchmarking IntegerSquareRoot()");
-		runs = 0;
-		stopWatch.Restart();
-		for (UInt64 i = UInt64.MaxValue; i >= 10; i /= 3)
-		{
-			var actual = Prime.IntegerSquareRoot(i);
-			runs++;
-		}
-		stopWatch.Stop();
-		Console.WriteLine($" Time to compute {runs} runs ".FormatTimeSpan(stopWatch.Elapsed));
-	}
 }

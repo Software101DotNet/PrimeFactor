@@ -10,10 +10,11 @@ namespace PrimeFactor;
 public class Benchmark
 {
 	/// Method to messuring the Prime Generation performance of a computer platform.
-	/// Past runs on the following platforms:
-	/// MacBook Air M4, Benchmarking 10,000,000 primes. Time to compute 14s,878ms 
-	/// Mac Mini M2P, Benchmarking 10,000,000 primes. Time to compute 17s 310ms ~ 17s 686ms
-	/// Xeon E5-1650 v2, Benchmarking 10,000,000 primes. Time to compute 2m 26s 217ms ~ 2m 28s 41ms
+	/// 5 runs benchmarking 10,000,000 primes on the following platforms:
+	/// MacBook Air M4. Time to compute 14s,878ms 
+	/// Mac Mini M2P. Time to compute 17s 310ms ~ 17s 686ms
+	/// Xeon E5-1650 v2, Time to compute 2m 26s 217ms ~ 2m 28s 41ms
+	/// Xeon E5-2697 v2, Time to compute 2m 33s 497ms ~ 3m 13s 879ms
 	public static void Serial10M()
 	{
 		const uint limit = 10_000_000;

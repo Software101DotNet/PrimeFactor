@@ -15,7 +15,9 @@ public enum Modes
 	Version,    // display version information
 	Factor,     // find the prime factors of the given number or indicate that the number is prime.
 	GeneratePrimes,
-	Benchmark,  // benchmark performance
+	IsPrime,	// less processing required then Factor. Intended for script languages
+	Benchmark,  // benchmark performance 10M single threaded
+	Benchmark2,	// benchmark performance 18,446,744,073,709,551,615 (2^64-1)
 	PerfectNumber,
 	GCD         // find the greatest common divisor of the given set of numbers.
 }
@@ -81,8 +83,17 @@ public static class CmdlineSettings
 						SetMode(ref settings, Modes.GeneratePrimes);
 						break;
 
+					case "--isprime":
+						SetMode(ref settings, Modes.IsPrime);
+						settings.candidates = ParseCommandValues(param.Value, "--isprime");
+						break;
+
 					case "--benchmark":
 						SetMode(ref settings, Modes.Benchmark);
+						break;
+
+					case "--benchmark2":
+						SetMode(ref settings, Modes.Benchmark2);
 						break;
 
 					case "--filename":

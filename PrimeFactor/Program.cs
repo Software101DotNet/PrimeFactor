@@ -17,7 +17,7 @@ public class Program
 		try
 		{
 			settings = CmdlineSettings.Parse(args);
-
+			
 			switch (settings.Mode)
 			{
 				case Modes.GeneratePrimes:
@@ -47,6 +47,16 @@ public class Program
 					}
 					break;
 
+				case Modes.IsPrime:
+					foreach (var candidateFactor in settings.candidates)
+					{
+						if (Prime.IsPrime(candidateFactor))
+							Console.WriteLine($"true");
+						else
+							Console.WriteLine($"false");
+					}
+					break;
+
 				case Modes.PerfectNumber:
 					throw new NotImplementedException("Perfect Number calculation will be implemented in a later version");
 
@@ -54,7 +64,11 @@ public class Program
 					throw new NotImplementedException("Greatest Command Factor calculation will be implemented in a later version.");
 
 				case Modes.Benchmark:
-					Benchmark.Serial10M();
+					Benchmark.MultipleRuns(Benchmark.Serial10M, 100);
+					break;
+
+				case Modes.Benchmark2:
+					Benchmark.SerialMax();
 					break;
 
 				case Modes.Version:
@@ -67,7 +81,6 @@ public class Program
 					ConsoleDisplay.DisplayHelp();
 					break;
 			}
-
 		}
 		catch (Exception e)
 		{

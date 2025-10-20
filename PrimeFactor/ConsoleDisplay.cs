@@ -6,6 +6,9 @@
 using System.Text;
 using System.Globalization;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
+using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace PrimeFactor;
 
@@ -67,11 +70,21 @@ public static class ConsoleExtended
 		Console.Write(message);
 		Console.ForegroundColor = originalForegroundColour;
 	}
+	public static void WriteLine(string message)
+	{
+		var originalForegroundColour = Console.ForegroundColor;
+		var originalBackgroundColour = Console.BackgroundColor;
+		Console.ForegroundColor = originalBackgroundColour;
+		Console.BackgroundColor = originalForegroundColour;
+		Console.Write(message);
+		Console.ForegroundColor = originalForegroundColour;
+		Console.BackgroundColor = originalBackgroundColour;
+		Console.WriteLine();
+	}
 }
 
 public class ConsoleDisplay
 {
-
 	public static void Display(Factored n, bool quite = false)
 	{
 		if (quite)
@@ -147,6 +160,8 @@ public class ConsoleDisplay
 	{
 		var softwareVersion = Program.SoftwareVerison();
 		var assemblyName = typeof(CmdlineSettings).Assembly.GetName();
+		var supported = "is supported";
+		var unsupported = "is not supported";
 
 #if DEBUG
 		ConsoleExtended.WriteLine($"{assemblyName?.Name} version {softwareVersion} debug build.", ConsoleColor.DarkRed);
@@ -169,6 +184,18 @@ public class ConsoleDisplay
 		Console.WriteLine($"CLR version: {Environment.Version}, {(Environment.Is64BitProcess ? "64" : "32")} bit process.");
 		Console.WriteLine($"Running on {Environment.OSVersion}");
 		Console.WriteLine($"Maximum degree of parallelisum: {Environment.ProcessorCount} processors.");
+
+		Console.WriteLine($"OS Architecture: {RuntimeInformation.OSArchitecture}");
+		Console.WriteLine($"Process Architecture: {RuntimeInformation.ProcessArchitecture}");
+
+		if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
+		{
+			Console.WriteLine("Intel SSE {0}.", Sse.IsSupported ? supported : unsupported);
+			Console.WriteLine("Intel AVX {0}.", Avx.IsSupported ? supported : unsupported);
+			Console.WriteLine("Intel AVX2 {0}.", Avx2.IsSupported ? supported : unsupported);
+		}
+
+		Console.WriteLine();
 	}
 
 	/// <summary>
@@ -185,17 +212,22 @@ public class ConsoleDisplay
 		Console.WriteLine();
 		Console.WriteLine("PrimeFactor [commands] [data]\n");
 
-		Console.WriteLine("Display this help screen.");
+		ConsoleExtended.WriteLine("Display this help screen.");
 		ConsoleExtended.WriteLine("\t--help\n", colour);
 
 		Console.WriteLine("Display the program version and poignuant platform information.");
 		ConsoleExtended.WriteLine("\t--version\n", colour);
 
-		Console.WriteLine("Calculate the prime factors of the given number n.");
+		ConsoleExtended.WriteLine("Calculate the prime factors of the given number n.");
 		Console.WriteLine("If the number is prime, then the output will be the single value n that is itself prime.");
 		Console.WriteLine("If the number is composite, then the output will be the calculated prime factors of n.");
 		Console.WriteLine("If a list of numbers are given, then the output will be the calculated prime factors of each number.");
 		ConsoleExtended.WriteLine("\t--factor [n | n .. nk] \n", colour);
+
+		Console.WriteLine("Primality test of a given number, returns true or false");
+		Console.WriteLine("Intended for use with scripting languages or in programs that are chained together using the pipe operator.");
+		Console.WriteLine("If a list of numbers are given n..nk, then the output will be true or false for each number.");
+		ConsoleExtended.WriteLine("\t--IsPrime [n | n .. nk] \n", colour);
 
 		Console.WriteLine("Generate a list of prime numbers.");
 		Console.WriteLine("The default is to generate all primes from 0 to 2^64-1.");
@@ -204,6 +236,12 @@ public class ConsoleDisplay
 		Console.WriteLine("If both --max and --count are specified, then the generation will stop when the first of the two limits is reached.");
 		Console.WriteLine("Use the --filename option when you want the generated prime values to be saved to the given file instead of the terminal window.");
 		ConsoleExtended.WriteLine("\t--generate [--min value] [--max value] [--count value] [--filename result.txt]\n", colour);
+
+		Console.WriteLine("Benchmark platform performance generating the first 10,000,000 prime numbers. This is primarily a benchmark of the CPU as only 80MB of memory is needed for the prime cache. Performs 5 runs and shows the min and max time taken.");
+		ConsoleExtended.WriteLine("\t--benchmark\n", colour);
+
+		Console.WriteLine("Benchmark platform performance generating the first 8,589,934,592 prime numbers. This is a performance benchmark of both the CPU and the use of memory as the prime cache is 64GB.");
+		ConsoleExtended.WriteLine("\t--benchmark2\n", colour);
 		Console.ForegroundColor = originalForegroundColour;
 	}
 }

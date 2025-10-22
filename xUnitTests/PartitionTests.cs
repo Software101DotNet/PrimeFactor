@@ -5,10 +5,8 @@
 
 namespace PrimeFactor.Tests;
 
-public class PartitionTests
+public class Tests_Partition
 {
-
-
 	[Fact]
 	public void PartitionTest_100to600by6()
 	{

@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace PrimeFactor.Tests;
 
-public class FactorTests
+public class Tests_Factor
 {
 	[Fact]
 	public void FactorTest()
@@ -52,7 +52,7 @@ public class FactorTests
 		}
 	}
 
-	[Fact]
+	[Fact(Skip = "Inconclusive: Test takes too long to run in CI pipeline (11hours+)")]
 	public void FactorTest_Max()
 	{
 		// Arrange
@@ -72,5 +72,4 @@ public class FactorTests
 		// assert that the product of the factors are equal to the test value.
 		Assert.Equal(testValue, product);
 	}
-
 }

@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace PrimeFactor.Tests;
 
-public class PrimeTests
+public class Tests_Prime
 {
 	[Fact]
 	public void IsPrimeTest_Enumerable()

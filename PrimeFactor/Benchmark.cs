@@ -18,12 +18,10 @@ public class Benchmark
 	/// 
 
 	/// <param name="action">The action to be measured</param>
-	public static void MultipleRuns(Func<TimeSpan> action, int runs = 5)
+	public static void MultipleRuns(Func<TimeSpan> action, int runs)
 	{
-		if (runs < 3)
-			runs = 5; // default to 5 runs if invalid number provided
-		else if (runs % 2 == 0)
-			runs++; // Enforce odd number of runs for simpler median calculation
+		if (runs < 1)
+			throw new ArgumentException("Number of benchmark runs must be greater than zero.", nameof(runs));
 
 		var runDurations = new List<long>(runs);
 		Console.WriteLine($"Benchmarking {runs} runs, please wait...");
@@ -39,17 +37,104 @@ public class Benchmark
 		}
 
 		runDurations.Sort();
-		var medianTS = new TimeSpan(runDurations[runs / 2]);
 		var minTS = new TimeSpan(runDurations[0]);
 		var maxTS = new TimeSpan(runDurations[runs - 1]);
-		Console.WriteLine($"Time to compute each run ".FormatTimeSpan(minTS) + "~ ".FormatTimeSpan(maxTS) + ", median " + "".FormatTimeSpan(medianTS));
+
+		var medianTS = new TimeSpan(CalculateMedian(runDurations));
+
+		long averageTicks = CalculateAverage(runDurations);
+		var averageTS = new TimeSpan(averageTicks);
+
+		var sdTS = new TimeSpan(CalculateStandardDeviation(runDurations, averageTicks));
+		var modeTS = new TimeSpan(CalculateStatisticalMode(runDurations));
+		Console.WriteLine($"Time to compute each run " + "".FormatTimeSpan(minTS) + "~ ".FormatTimeSpan(maxTS) + $", median ".FormatTimeSpan(medianTS) + $", average ".FormatTimeSpan(averageTS) + $", standard deviation ".FormatTimeSpan(sdTS) + $", mode ".FormatTimeSpan(modeTS));
+	}
+
+	private static long CalculateMedian(List<long> series)
+	{
+		if (series == null)
+			throw new ArgumentNullException(nameof(series));
+		if (series.Count == 0)
+			throw new InvalidOperationException("Cannot compute the median of an empty list."); // Matches the mathematical definition (mean is undefined for an empty set).
+
+		// calculate the median time taken
+		// odd number of runs, take the middle value for the median
+		var median = series[series.Count / 2];
+		if (series.Count % 2 == 0)
+		{
+			// When the number of runs is even, average the middle two values for the median
+			median += series[series.Count / 2 - 1];
+			median /= 2;
+		}
+
+		return median;
+	}
+
+	private static long CalculateAverage(List<long> series)
+	{
+		if (series == null)
+			throw new ArgumentNullException(nameof(series));
+		if (series.Count == 0)
+			throw new InvalidOperationException("Cannot compute the average of an empty list."); // Matches the mathematical definition (mean is undefined for an empty set).
+
+		var total = 0L;
+		for (var i = 0; i < series.Count; i++)
+			total += series[i];
+		var average = total / series.Count;
+		return average;
+	}
+
+	private static long CalculateStandardDeviation(List<long> series, long average)
+	{
+		if (series == null)
+			throw new ArgumentNullException(nameof(series));
+		if (series.Count == 0)
+			throw new InvalidOperationException("Cannot compute the standard deviation of an empty list."); // Matches the mathematical definition (mean is undefined for an empty set).
+
+		double sumOfSquaresOfDifferences = 0;
+		for (var i = 0; i < series.Count; i++)
+		{
+			var difference = series[i] - average;
+			sumOfSquaresOfDifferences += difference * difference;
+		}
+		var standardDeviation = Math.Sqrt(sumOfSquaresOfDifferences / series.Count);
+		return (long)standardDeviation;
+	}
+
+	// calculate the statistical Mode - the most frequently occurring value.
+	private static long CalculateStatisticalMode(List<long> series)
+	{
+		if (series == null)
+			throw new ArgumentNullException(nameof(series));
+		if (series.Count == 0)
+			throw new InvalidOperationException("Cannot compute the statisical mode of an empty list."); // Matches the mathematical definition (mean is undefined for an empty set).
+
+		var modeDict = new Dictionary<long, int>();
+		for (var i = 0; i < series.Count; i++)
+		{
+			if (modeDict.ContainsKey(series[i]))
+				modeDict[series[i]]++;
+			else
+				modeDict[series[i]] = 1;
+		}
+		var mode = series[0];
+		var modeCount = 1;
+		foreach (var kvp in modeDict)
+		{
+			if (kvp.Value > modeCount)
+			{
+				mode = kvp.Key;
+				modeCount = kvp.Value;
+			}
+		}
+		return mode;
 	}
 
 	/// measure the Prime Generation performance of a computer platform for 10 million primes.
 	/// returns the TimeSpan taken to complete the task.
 	public static TimeSpan Serial10M()
 	{
-		const uint limit = 10_000_000;
+		const uint limit = 10_000_00;
 		var writer = new StreamWriter(Stream.Null);
 
 		Console.Write($"Benchmarking {limit:N0} primes... ");

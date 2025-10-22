@@ -31,6 +31,7 @@ public struct Settings
 	public bool DevMode { get; set; } = false;// used to enable development mode features such as time expensive or destructive processing operations will be skipped.
 	public Modes Mode { get; set; } = Modes.Undefined;
 	public LogLevel LogLevel { get; set; } = LogLevel.Warning;
+	public int benchmarkRuns { get; set; } = 5; // default number of benchmark runs to perform
 
 	// List of candidates to factor. 
 	public List<ulong> candidates { get; set; } = new List<ulong>();
@@ -90,6 +91,16 @@ public static class CmdlineSettings
 
 					case "--benchmark":
 						SetMode(ref settings, Modes.Benchmark);
+
+						try	// benchmark runs is optional
+						{
+							settings.benchmarkRuns = (int)ParseCommandValue(param.Value, "--benchmark");
+						}
+						catch (ArgumentException)
+						{
+							// In this case, this is not an error because benchmark runs is optional, so
+							// leave the value as the default value, because an optional value was not specified.
+						}
 						break;
 
 					case "--benchmark2":

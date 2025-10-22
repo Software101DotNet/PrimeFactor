@@ -64,7 +64,7 @@ public class Program
 					throw new NotImplementedException("Greatest Command Factor calculation will be implemented in a later version.");
 
 				case Modes.Benchmark:
-					Benchmark.MultipleRuns(Benchmark.Serial10M, 100);
+					Benchmark.MultipleRuns(Benchmark.Serial10M, settings.benchmarkRuns);
 					break;
 
 				case Modes.Benchmark2:

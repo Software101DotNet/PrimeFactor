@@ -134,7 +134,7 @@ public class Benchmark
 	/// returns the TimeSpan taken to complete the task.
 	public static TimeSpan Serial10M()
 	{
-		const uint limit = 10_000_00;
+		const uint limit = 10_000_000;
 		var writer = new StreamWriter(Stream.Null);
 
 		Console.Write($"Benchmarking {limit:N0} primes... ");

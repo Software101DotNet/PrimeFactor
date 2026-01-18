@@ -5,6 +5,28 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "--version",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["--version"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		},
+		{
+			"name": "--help",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["--help"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		},
+		{
 			"name": "--generate",
 			"type": "coreclr", //"dotnet",
 			"request": "launch",
@@ -33,6 +55,17 @@
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
 			"args": ["--benchmark"],
+			"cwd": "${workspaceFolder}/PrimeFactor",
+			"stopAtEntry": false,
+			"console": "internalConsole" 
+		},
+		{
+			"name": "--benchmark2",
+			"type": "coreclr", //"dotnet",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
+			"args": ["--benchmark2"],
 			"cwd": "${workspaceFolder}/PrimeFactor",
 			"stopAtEntry": false,
 			"console": "internalConsole" 

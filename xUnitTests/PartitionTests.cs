@@ -8,6 +8,18 @@ namespace PrimeFactor.Tests;
 public class Tests_Partition
 {
 	[Fact]
+	public void PartitionTest_InvalidPartitions_ThrowsException()
+	{
+		Assert.Throws<ArgumentException>(() => Prime.Partition(0, 10));
+	}
+
+	[Fact]
+	public void PartitionTest_FirstGreaterThanLast_ThrowsException()
+	{
+		Assert.Throws<ArgumentException>(() => Prime.Partition(2, lastValue: 5, firstValue: 7));
+	}
+
+	[Fact]
 	public void PartitionTest_100to600by6()
 	{
 		// Arrange
@@ -17,7 +29,7 @@ public class Tests_Partition
 
 		var expected = new (ulong, ulong)[] // (first, last) value in a partition
 		{
-			(101,184),(185,268),(269,352), (353,436),(437,520),(521,600)
+			(101,184),(185,268),(269,352),(353,436),(437,520),(521,600)
 		};
 
 		CheckContiguousSeries(expected);
@@ -45,7 +57,7 @@ public class Tests_Partition
 		// check the expected data is a contiguous integer series
 		for (int i = 1; i < expected.Count(); i++)
 		{
-			var difference = expected[i].Item1 - expected[i - 1].Item2;
+			//var difference = expected[i].Item1 - expected[i - 1].Item2;
 			Assert.Equal(1UL, (expected[i].Item1 - expected[i - 1].Item2));
 		}
 	}
@@ -224,4 +236,26 @@ public class Tests_Partition
 		// Assert
 		CheckResult(expected, ranges);
 	}
+
+	[Fact]
+	public void PartitionTest_1to10by1()
+	{
+		// Arrange
+		ulong firstValue = 2;
+		ulong lastValue = 10;
+		ulong partitions = 10;
+
+		var expected = new (ulong, ulong)[] // (first, last) value in a partition
+		{
+			(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10)
+		};
+		CheckContiguousSeries(expected);
+
+		// Act
+		var ranges = Prime.Partition(partitions, lastValue, firstValue);
+
+		// Assert
+		CheckResult(expected, ranges);
+	}
+
 }

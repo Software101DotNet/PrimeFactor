@@ -4,16 +4,6 @@
 #include <time.h>
 #include <float.h>
 
-// example output: 2026-01-18 16:09:45
-void PrintCurrentTime(void)
-{
-	time_t now = time(NULL);
-	struct tm *local = localtime(&now);
-	char buffer[64];
-	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", local);
-	printf("%s\n", buffer);
-}
-
 void *xmalloc(size_t n)
 {
 	void *p = malloc(n);
@@ -23,22 +13,49 @@ void *xmalloc(size_t n)
 		exit(EXIT_FAILURE);
 	}
 	return p;
+
+#if nop
+#define CACHE_BLOCK_SIZE 3
+#define CACHE_BLOCKS 7
+
+	// allocate memory for cache
+	size_t allocationSize = CACHE_BLOCKS * sizeof(unsigned long *);
+	unsigned long *pCache[CACHE_BLOCKS] = xmalloc(allocationSize);
+
+	allocationSize = CACHE_BLOCK_SIZE * sizeof(unsigned long);
+	for (int i = 0; i < CACHE_BLOCKS; i++)
+	{
+		pCache[i] = xmalloc(allocationSize);
+	}
+
+	// free memory for cache
+	for (int i = 0; i < CACHE_BLOCKS; i++)
+	{
+		free(pCache[i]);
+		pCache[i] = (unsigned long *)0;
+	}
+	free(*pCache);
+	*pCache = (unsigned long *)0;
+#endif
 }
 
-void GeneratePrimes(unsigned long limit)
+void GeneratePrimes(unsigned long limit, int displayProgress)
 {
+	clock_t start = clock();
+
 	// 18446744073709551615 (on 64-bit systems)
 	// 4294967295           (on 32-bit systems)
 	unsigned long max_value = ULONG_MAX;
-	unsigned long primeCount = 0;
+	unsigned long primeCount = 1; // +1 for prime number 2
+	unsigned long primeCandidate = 3;
 
-	for (unsigned long num = 3; num <= limit && num < max_value; num += 2)
+	for (; (primeCandidate <= limit) && (primeCandidate < max_value); primeCandidate += 2)
 	{
 		int is_prime = 1; // assume prime until proven otherwise
 
-		for (unsigned long div = 3; div * div <= num; div += 2)
+		for (unsigned long div = 3; (div * div) <= primeCandidate; div += 2)
 		{
-			if (num % div == 0)
+			if (primeCandidate % div == 0)
 			{
 				is_prime = 0; // found a divisor, not prime
 				break;
@@ -49,20 +66,32 @@ void GeneratePrimes(unsigned long limit)
 		{
 			primeCount++;
 		}
+
+		// print progress every 16 million numbers checked
+		if (displayProgress && (primeCandidate % 16777216UL == 1))
+		{
+			clock_t end = clock();
+			clock_t ticks = end - start;
+			printf("%.3fs %lu primes found from 1 to %lu\n", ((float)(ticks) / CLOCKS_PER_SEC), primeCount, primeCandidate);
+		}
 	}
 
-	printf("Number of primes found up to %lu: %lu\n", limit, primeCount + 1); // +1 for prime number 2
+	clock_t end = clock();
+	clock_t ticks = end - start;
+	printf("%.3fs %lu primes found from 1 to %lu\n", ((float)(ticks) / CLOCKS_PER_SEC), primeCount, primeCandidate);
 }
+
+typedef float (*fpSerial10M)(void);
 
 float Serial10M(void)
 {
-	const unsigned long limit = 10000000UL;
-
-	printf("Benchmarking %lu primes... ", limit);
+	const unsigned long limit = 4294967296UL; // 10000000UL;
+	const int displayProgress = 1;
+	printf("Benchmarking primality test for values between 1 and %lu ... ", limit);
 	clock_t start = clock();
 
 	// using a null stream as there is no need to write the resulting calculations to a screen or file.
-	GeneratePrimes(limit);
+	GeneratePrimes(limit, displayProgress);
 
 	clock_t end = clock();
 	clock_t ticks = end - start;
@@ -71,13 +100,11 @@ float Serial10M(void)
 	return ticks;
 }
 
-typedef float (*fp)(void);
-
-void MultipleRuns(fp action, int runs)
+void MultipleRuns(fpSerial10M action, int runs)
 {
 	if (runs < 1)
 	{
-		printf("Number of benchmark runs must be greater than zero.");
+		printf("Number of benchmark runs should be greater than zero.");
 		return;
 	}
 
@@ -85,6 +112,8 @@ void MultipleRuns(fp action, int runs)
 
 	float minDuration = FLT_MAX;
 	float maxDuration = 0.0f;
+	float avgDuration = 0.0f;
+
 	for (int i = 1; i <= runs; i++)
 	{
 		printf("Run %d ", i);
@@ -92,22 +121,22 @@ void MultipleRuns(fp action, int runs)
 		// run the task to be measured here
 		float timeToCompute = action();
 
+		avgDuration += timeToCompute;
 		if (timeToCompute < minDuration)
 			minDuration = timeToCompute;
 		if (timeToCompute > maxDuration)
 			maxDuration = timeToCompute;
 	}
 
-	printf("Time to compute each run %.3fs ~ %.3fs\n", ((float)(minDuration) / CLOCKS_PER_SEC), ((float)(maxDuration) / CLOCKS_PER_SEC));
+	avgDuration /= runs;
+	printf("Time to compute each run %.3fs ~ %.3fs, average %.3fs\n", ((float)(minDuration) / CLOCKS_PER_SEC), ((float)(maxDuration) / CLOCKS_PER_SEC), ((float)(avgDuration) / CLOCKS_PER_SEC));
 }
 
 int main(void)
 {
-	PrintCurrentTime();
+	fpSerial10M action = &Serial10M;
+	const int runs = 1;
 
-	fp action = &Serial10M;
-	const int runs = 5;
-	
 	MultipleRuns(action, runs);
 
 	return 0;

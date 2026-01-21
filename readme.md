@@ -1,25 +1,10 @@
-<!-- A template readme.md file as a starting point of a new software project -->
-<a name="readme-top"></a>
-<!-- If you have a suggestion that would make this better, please fork the repo and create a pull request or simply open an issue with the tag "enhancement". -->
-
-<!-- PROJECT SHIELDS -->
-<!--
-using markdown "reference style" links for readability in this file.
-Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-See the bottom of this document for the declaration of the reference variables for contributors-url, forks-url, etc. 
-https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![GPL License][license-shield]][license-url]
 
-
-<!-- PROJECT LOGO -->
-<br />
 <div align="center">
-
 
 <h3 align="center">Prime Factor</h3>
 
@@ -34,8 +19,6 @@ https://www.markdownguide.org/basic-syntax/#reference-style-links
     <a href="https://github.com/Software101DotNet/PrimeFactor/issues">Request Feature</a>
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS, can be removed if readme is small -->
 <details>
@@ -76,22 +59,19 @@ A command line tool for assisting number theory research, teaching and cryptogra
   * Calculate the Greatest Common Divisor for a given series of numbers
 
 
-
-
 ### Built With
 
 * Dot Net 9
 * VS Code
 
 
-
-<!-- GETTING STARTED -->
 ## Getting Started
 
 * Install DotNet if your platform does not already have it. 
 * Clone this repo.
 * Build the project.
 * Run "./PrimeFactor --help" for usage instructions. 
+
 
 ### Prerequisites
 
@@ -126,8 +106,6 @@ A command line tool for assisting number theory research, teaching and cryptogra
    ```
 
 
-
-<!-- USAGE EXAMPLES -->
 ## Usage
 
 For upto date usage, Run 
@@ -135,21 +113,32 @@ For upto date usage, Run
 ./PrimeFactor --help 
 ```
 
-
-<!-- ROADMAP -->
 ## Roadmap
 
 - [completed v1.0] Prime factoring of given number
 - [completed v1.0] Prime number series generation
     - [Complated v1.0] support for directing output to a file stream. Usesful for very large series generation.
-- [ v2 ] Support for Greatest Common Divisor
+- [ v2 ] Support for Greatest Common Divisor (supporting a series of more than two values)
 - [ v3 ] Support for Perfect Numbers
 - [ v4 ] Support for number range 1 to 340,282,366,920,938,463,463,374,607,431,768,211,455 (2^128 bits) 
 
 See the [open issues](https://github.com/Software101DotNet/CreateDotNetProject/issues) for a full list of proposed features (and known issues).
 
 
-<!-- CONTRIBUTING -->
+## Notes On Performance
+
+(base) anthony@MBA-M4 PrimeFactor % dotnet build --configuration Release        
+Restore complete (0.1s)
+  PrimeFactor succeeded (0.9s) → bin/Release/net9.0/PrimeFactor.dll
+
+Build succeeded in 1.1s
+(base) anthony@MBA-M4 PrimeFactor % ./bin/Release/net9.0/PrimeFactor --benchmark
+Benchmarking 250 runs, please wait...
+Run 1 Benchmarking 10,000,000 primes... Completed in 15s 334ms 
+Run 2 Benchmarking 10,000,000 primes... Completed in 15s 305ms 
+Run 3 Benchmarking 10,000,000 primes... Completed in 15s 309ms 
+
+
 ## Contributing
 
 If you have any additions or improvements that would make this project better, please fork the repository and create a pull request. You can also simply open an issue with the tag "enhancement". Thanks.
@@ -162,17 +151,11 @@ If you have any additions or improvements that would make this project better, p
 5. Open a Pull Request
 
 
+## License 
+
+Distributed under the GPL License. See `LICENSE.txt` for more information.
 
 
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-
-
-
-<!-- CONTACT -->
 ## Contact
 
 Anthony Ransley - software101.net@gmail.com
@@ -180,9 +163,6 @@ Anthony Ransley - software101.net@gmail.com
 Project Link: [https://github.com/Software101DotNet/PrimeFactor](https://github.com/Software101DotNet/PrimeFactor)
 
 
-
-
-<!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
 * [Choose an Open Source License](https://choosealicense.com)

@@ -19,50 +19,11 @@
 #include <time.h>
 #include <float.h>
 
-void *xmalloc(size_t n)
+unsigned long GeneratePrimes(unsigned long limit)
 {
-	void *p = malloc(n);
-	if (!p)
-	{
-		fprintf(stderr, "fatal error: failed to allocate memory (%zu bytes)\n", n);
-		exit(EXIT_FAILURE);
-	}
-	return p;
-
-#if nop
-#define CACHE_BLOCK_SIZE 3
-#define CACHE_BLOCKS 7
-
-	// allocate memory for cache
-	size_t allocationSize = CACHE_BLOCKS * sizeof(unsigned long *);
-	unsigned long *pCache[CACHE_BLOCKS] = xmalloc(allocationSize);
-
-	allocationSize = CACHE_BLOCK_SIZE * sizeof(unsigned long);
-	for (int i = 0; i < CACHE_BLOCKS; i++)
-	{
-		pCache[i] = xmalloc(allocationSize);
-	}
-
-	// free memory for cache
-	for (int i = 0; i < CACHE_BLOCKS; i++)
-	{
-		free(pCache[i]);
-		pCache[i] = (unsigned long *)0;
-	}
-	free(*pCache);
-	*pCache = (unsigned long *)0;
-#endif
-}
-
-void GeneratePrimes(unsigned long limit, int displayProgress)
-{
-	clock_t start = clock();
-
-	// 18446744073709551615 (on 64-bit systems)
-	// 4294967295           (on 32-bit systems)
 	unsigned long max_value = ULONG_MAX;
 	unsigned long primeCount = 1; // +1 for prime number 2
-	unsigned long primeCandidate = 3;
+	unsigned long primeCandidate = 3; // the algorithm assumes starting on an odd number due to the +=2 step
 
 	for (; (primeCandidate <= limit) && (primeCandidate < max_value); primeCandidate += 2)
 	{
@@ -81,41 +42,31 @@ void GeneratePrimes(unsigned long limit, int displayProgress)
 		{
 			primeCount++;
 		}
-
-		// print progress every 16 million numbers checked
-		if (displayProgress && (primeCandidate % 16777216UL == 1))
-		{
-			clock_t end = clock();
-			clock_t ticks = end - start;
-			printf("%.3fs %lu primes found from 1 to %lu\n", ((float)(ticks) / CLOCKS_PER_SEC), primeCount, primeCandidate);
-		}
 	}
-
-	clock_t end = clock();
-	clock_t ticks = end - start;
-	printf("%.3fs %lu primes found from 1 to %lu\n", ((float)(ticks) / CLOCKS_PER_SEC), primeCount, primeCandidate);
+	return primeCount;
 }
 
-typedef float (*fpSerial10M)(void);
+typedef float (*fp)(void);
 
-float Serial10M(void)
+float Benchmark(void)
 {
-	const unsigned long limit = 4294967296UL; // 10000000UL;
-	const int displayProgress = 1;
+	// 18446744073709551615 (on 64-bit systems)
+	// 4294967295           (on 32-bit systems)
+	const unsigned long limit = 4294967296UL; // max value for UInt32
 	printf("Benchmarking primality test for values between 1 and %lu ... ", limit);
 	clock_t start = clock();
 
 	// using a null stream as there is no need to write the resulting calculations to a screen or file.
-	GeneratePrimes(limit, displayProgress);
+	unsigned long primeCount = GeneratePrimes(limit);
 
 	clock_t end = clock();
 	clock_t ticks = end - start;
-	printf("Completed in %.3fs\n", ((float)(ticks) / CLOCKS_PER_SEC));
+	printf("%lu primes found in %.3fs\n", primeCount,((float)(ticks) / CLOCKS_PER_SEC));
 
 	return ticks;
 }
 
-void MultipleRuns(fpSerial10M action, int runs)
+void MultipleRuns(fp action, int runs)
 {
 	if (runs < 1)
 	{
@@ -149,7 +100,7 @@ void MultipleRuns(fpSerial10M action, int runs)
 
 int main(void)
 {
-	fpSerial10M action = &Serial10M;
+	fp action = &Benchmark;
 	const int runs = 1;
 
 	MultipleRuns(action, runs);

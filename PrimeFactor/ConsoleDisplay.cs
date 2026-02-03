@@ -1,7 +1,17 @@
-// PrimeFactor
-// A command line tool for finding prime factors of numbers, generating primes, and calculating GCD.
-// The use of this source code file is governed by the license outlined in the License.txt file of this project.
+// Copyright (C) 2025-2026 Anthony Ransley
 // https://github.com/Software101DotNet/PrimeFactor
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Text;
 using System.Globalization;
@@ -237,11 +247,15 @@ public class ConsoleDisplay
 		Console.WriteLine("Use the --filename option when you want the generated prime values to be saved to the given file instead of the terminal window.");
 		ConsoleExtended.WriteLine("\t--generate [--min value] [--max value] [--count value] [--filename result.txt]\n", colour);
 
-		Console.WriteLine("Benchmark platform performance generating the first 10,000,000 prime numbers. This is primarily a benchmark of the CPU as only 80MB of memory is needed for the prime cache. Performs 5 runs and shows the min and max time taken.");
-		ConsoleExtended.WriteLine("\t--benchmark\n", colour);
+		Console.WriteLine("Benchmark1, platform performance measurement of primality testing from values from 1 to limit. The default limit is 10,000,000, and the maximum limit value that the implementation will accept is 4,294,967,296. Specifying a limit of 0 will indicate that the maximum limit should be used. This benchmark does not use caching of previously found primes. The default number of runs is 1. When more than 1 run is specified, each benchmark is run in turn, with additional statistical information calculated. Minimum, Maximum, Median and Average.");
+		ConsoleExtended.WriteLine("\t--benchmark1 [limit | limit runs]\n", colour);
 
-		Console.WriteLine("Benchmark platform performance generating the first 8,589,934,592 prime numbers. This is a performance benchmark of both the CPU and the use of memory as the prime cache is 64GB.");
-		ConsoleExtended.WriteLine("\t--benchmark2\n", colour);
+		Console.WriteLine("Benchmark2, same as Benchmark1, except that it partitions the number range 1 to limit by the number of available processor cores and performs the primality test in parallel.");
+		ConsoleExtended.WriteLine("\t--benchmark2 [limit | limit runs]\n", colour);
+
+		Console.WriteLine("Benchmark3, same as Benchmark1 except that it uses memory to cache the prime values as it proceeds through the number range 1 to limit.");
+		ConsoleExtended.WriteLine("\t--benchmark3 [limit | limit runs]\n", colour);
+
 		Console.ForegroundColor = originalForegroundColour;
 	}
 }

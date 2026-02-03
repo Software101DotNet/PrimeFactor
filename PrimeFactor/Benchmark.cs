@@ -1,7 +1,17 @@
-// PrimeFactor
-// A command line tool for finding prime factors of numbers, generating primes, and calculating GCD.
-// The use of this source code file is governed by the license outlined in the License.txt file of this project.
+// Copyright (C) 2025-2026 Anthony Ransley
 // https://github.com/Software101DotNet/PrimeFactor
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Diagnostics;
 
@@ -18,36 +28,40 @@ public class Benchmark
 	/// 
 
 	/// <param name="action">The action to be measured</param>
-	public static void MultipleRuns(Func<TimeSpan> action, int runs)
+	public static void MultipleRuns(Func<ulong, TimeSpan> action, ulong limit, int runs)
 	{
-		if (runs < 1)
-			throw new ArgumentException("Number of benchmark runs must be greater than zero.", nameof(runs));
-
-		var runDurations = new List<long>(runs);
-		Console.WriteLine($"Benchmarking {runs} runs, please wait...");
-
-		for (var i = 1; i <= runs; i++)
+		if (runs <= 1)
 		{
-			Console.Write($"Run {i} ");
-
-			// run the task to be measured here
-			var timeToCompute = action();
-
-			runDurations.Add(timeToCompute.Ticks);
+			var timeToCompute = action(limit);
 		}
+		else
+		{
+			var runDurations = new List<long>(runs);
+			Console.WriteLine($"Benchmarking {runs} runs, please wait...");
 
-		runDurations.Sort();
-		var minTS = new TimeSpan(runDurations[0]);
-		var maxTS = new TimeSpan(runDurations[runs - 1]);
+			for (var i = 1; i <= runs; i++)
+			{
+				Console.Write($"Run {i} ");
 
-		var medianTS = new TimeSpan(CalculateMedian(runDurations));
+				// run the task to be measured here
+				var timeToCompute = action(limit);
 
-		long averageTicks = CalculateAverage(runDurations);
-		var averageTS = new TimeSpan(averageTicks);
+				runDurations.Add(timeToCompute.Ticks);
+			}
 
-		var sdTS = new TimeSpan(CalculateStandardDeviation(runDurations, averageTicks));
-		var modeTS = new TimeSpan(CalculateStatisticalMode(runDurations));
-		Console.WriteLine($"Time to compute each run " + "".FormatTimeSpan(minTS) + "~ ".FormatTimeSpan(maxTS) + $", median ".FormatTimeSpan(medianTS) + $", average ".FormatTimeSpan(averageTS) + $", standard deviation ".FormatTimeSpan(sdTS) + $", mode ".FormatTimeSpan(modeTS));
+			runDurations.Sort();
+			var minTS = new TimeSpan(runDurations[0]);
+			var maxTS = new TimeSpan(runDurations[runs - 1]);
+
+			var medianTS = new TimeSpan(CalculateMedian(runDurations));
+
+			long averageTicks = CalculateAverage(runDurations);
+			var averageTS = new TimeSpan(averageTicks);
+
+			var sdTS = new TimeSpan(CalculateStandardDeviation(runDurations, averageTicks));
+			var modeTS = new TimeSpan(CalculateStatisticalMode(runDurations));
+			Console.WriteLine($"Time to compute each run " + "".FormatTimeSpan(minTS) + "~ ".FormatTimeSpan(maxTS) + $", median ".FormatTimeSpan(medianTS) + $", average ".FormatTimeSpan(averageTS) + $", standard deviation ".FormatTimeSpan(sdTS) + $", mode ".FormatTimeSpan(modeTS));
+		}
 	}
 
 	private static long CalculateMedian(List<long> series)
@@ -130,41 +144,20 @@ public class Benchmark
 		return mode;
 	}
 
-	/// measure the Prime Generation performance of a computer platform for 10 million primes.
-	/// returns the TimeSpan taken to complete the task.
-	public static TimeSpan Serial10M()
+	/// measure the Primality test performance of a computer platform for values from 1 to limit.
+	public static TimeSpan SerialBenchmark(ulong limit)
 	{
-		const uint limit = 10_000_000;
-		var writer = new StreamWriter(Stream.Null);
+		Console.Write($"Benchmarking primality test for values between 1 and {limit:N0} ... ");
 
-		Console.Write($"Benchmarking {limit:N0} primes... ");
 		Stopwatch stopWatch = new Stopwatch();
 		stopWatch.Restart();
 
 		// using a null stream as there is no need to write the resulting calculations to a screen or file.
-		Prime.GeneratePrimes(writer, maxIndex: limit);
+		UInt64 primeCount = Prime.GeneratePrimes(limit);
 
 		stopWatch.Stop();
-		Console.WriteLine($"Completed in ".FormatTimeSpan(stopWatch.Elapsed));
-
+		Console.WriteLine($"{primeCount:N0} primes found in ".FormatTimeSpan(stopWatch.Elapsed));
 		return new TimeSpan(stopWatch.Elapsed.Ticks);
-	}
-
-	/// measure the Prime Generation performance of a computer platform for 2^64.
-	public static void SerialMax()
-	{
-		const ulong limit = ulong.MaxValue;
-		Console.WriteLine($"Benchmarking {limit:N0} primes...");
-
-		var writer = new StreamWriter(Stream.Null);
-		Stopwatch stopWatch = new Stopwatch();
-		stopWatch.Restart();
-
-		// using a null stream as there is no need to write the resulting calculations to a screen or file.
-		Prime.GeneratePrimes(writer, maxValue: limit);
-
-		stopWatch.Stop();
-		Console.WriteLine($"Completed in ".FormatTimeSpan(stopWatch.Elapsed));
 	}
 }
 

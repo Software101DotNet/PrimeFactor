@@ -1,7 +1,18 @@
-﻿// PrimeFactor
-// A command line tool for finding prime factors of numbers, generating primes, and calculating GCD.
-// The use of this source code file is governed by the license outlined in the License.txt file of this project.
+﻿// Copyright (C) 2025-2026 Anthony Ransley
 // https://github.com/Software101DotNet/PrimeFactor
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -15,9 +26,10 @@ public enum Modes
 	Version,    // display version information
 	Factor,     // find the prime factors of the given number or indicate that the number is prime.
 	GeneratePrimes,
-	IsPrime,	// less processing required then Factor. Intended for script languages
-	Benchmark,  // benchmark performance 10M single threaded
-	Benchmark2,	// benchmark performance 18,446,744,073,709,551,615 (2^64-1)
+	IsPrime,    // less processing required then Factor. Intended for script languages
+	Benchmark1, // benchmark primality test of values in the range 1..limit 
+	Benchmark2, // same as benchmark1, except employs parallelism.
+	Benchmark3, // same as Benchmark1 except that it uses memory to cache the prime values as it proceeds through the number range 1 to limit
 	PerfectNumber,
 	GCD         // find the greatest common divisor of the given set of numbers.
 }
@@ -31,7 +43,8 @@ public struct Settings
 	public bool DevMode { get; set; } = false;// used to enable development mode features such as time expensive or destructive processing operations will be skipped.
 	public Modes Mode { get; set; } = Modes.Undefined;
 	public LogLevel LogLevel { get; set; } = LogLevel.Warning;
-	public int benchmarkRuns { get; set; } = 5; // default number of benchmark runs to perform
+	public int benchmarkRuns { get; set; } = 1; // default number of benchmark runs to perform
+	public ulong benchmarkLimit { get; set; } = 10_000_000; // the default limit to benchmark
 
 	// List of candidates to factor. 
 	public List<ulong> candidates { get; set; } = new List<ulong>();
@@ -89,12 +102,16 @@ public static class CmdlineSettings
 						settings.candidates = ParseCommandValues(param.Value, "--isprime");
 						break;
 
-					case "--benchmark":
-						SetMode(ref settings, Modes.Benchmark);
+					case "--benchmark1":
+						SetMode(ref settings, Modes.Benchmark1);
 
-						try	// benchmark runs is optional
+						try // benchmark limit and runs are optional values. The first value is interprated as the limit and the second as the number of runs.
 						{
-							settings.benchmarkRuns = (int)ParseCommandValue(param.Value, "--benchmark");
+							var options = ParseCommandValues(param.Value, "--benchmark");
+							if (options.Count >= 1)
+								settings.benchmarkLimit = options[0] <= 0 ? 4294967296 : options[0];    // a given value of 0 is to be interprated to use the max value 2^32
+							if (options.Count >= 2)
+								settings.benchmarkRuns = (int)options[1];
 						}
 						catch (ArgumentException)
 						{

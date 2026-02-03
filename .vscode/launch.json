@@ -4,6 +4,10 @@
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
+
+
+
+
 		{
 			"name": "--version",
 			"type": "coreclr",
@@ -49,12 +53,12 @@
 			"console": "internalConsole" 
 		},
 		{
-			"name": "--benchmark",
+			"name": "--benchmark1",
 			"type": "coreclr", //"dotnet",
 			"request": "launch",
 			"preLaunchTask": "build",
 			"program": "${workspaceFolder}/PrimeFactor/bin/Debug/net9.0/PrimeFactor.dll",
-			"args": ["--benchmark"],
+			"args": ["--benchmark1","1000","3"],
 			"cwd": "${workspaceFolder}/PrimeFactor",
 			"stopAtEntry": false,
 			"console": "internalConsole" 

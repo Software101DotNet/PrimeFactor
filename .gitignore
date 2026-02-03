@@ -488,5 +488,4 @@ $RECYCLE.BIN/
 
 # Folders that store generated data.
 GeneratedData/
-PrimeFactorC/build/benchmark
-PrimeFactorC/build/main.o
+PrimeFactorC/build

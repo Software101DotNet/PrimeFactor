@@ -18,27 +18,34 @@
 #include <limits.h>
 #include <time.h>
 #include <float.h>
+#include <string.h>
+
+const char *version = "1.26.02.09";
 
 unsigned long GeneratePrimes(unsigned long limit)
 {
-	unsigned long max_value = ULONG_MAX;
-	unsigned long primeCount = 1; // +1 for prime number 2
+	if (limit < 2)
+	{
+		return 0;
+	}
+
+	unsigned long primeCount = 1;	  // +1 for prime number 2
 	unsigned long primeCandidate = 3; // the algorithm assumes starting on an odd number due to the +=2 step
 
-	for (; (primeCandidate <= limit) && (primeCandidate < max_value); primeCandidate += 2)
+	for (; (primeCandidate < limit); primeCandidate += 2)
 	{
-		int is_prime = 1; // assume prime until proven otherwise
+		int isPrime = 1; // assume prime until proven otherwise
 
 		for (unsigned long div = 3; (div * div) <= primeCandidate; div += 2)
 		{
 			if (primeCandidate % div == 0)
 			{
-				is_prime = 0; // found a divisor, not prime
+				isPrime = 0; // found a divisor, not prime
 				break;
 			}
 		}
 
-		if (is_prime)
+		if (isPrime)
 		{
 			primeCount++;
 		}
@@ -46,14 +53,14 @@ unsigned long GeneratePrimes(unsigned long limit)
 	return primeCount;
 }
 
-typedef float (*fp)(void);
+typedef float (*fp)(unsigned long);
 
-float Benchmark(void)
+float Benchmark(unsigned long limit)
 {
-	// 18446744073709551615 (on 64-bit systems)
-	// 4294967295           (on 32-bit systems)
-	const unsigned long limit = 4294967296UL; // max value for UInt32
+	// 18446744073709551615UL (on 64-bit systems)
+	// 4294967295UL           (on 32-bit systems)
 	printf("Benchmarking primality test for values between 1 and %lu ... ", limit);
+	fflush(stdout);
 	clock_t start = clock();
 
 	// using a null stream as there is no need to write the resulting calculations to a screen or file.
@@ -61,49 +68,173 @@ float Benchmark(void)
 
 	clock_t end = clock();
 	clock_t ticks = end - start;
-	printf("%lu primes found in %.3fs\n", primeCount,((float)(ticks) / CLOCKS_PER_SEC));
+	printf("%lu primes found in %.3fs\n", primeCount, ((float)(ticks) / CLOCKS_PER_SEC));
 
 	return ticks;
 }
 
-void MultipleRuns(fp action, int runs)
+void MultipleRuns(fp action, unsigned long limit, int runs)
 {
 	if (runs < 1)
 	{
 		printf("Number of benchmark runs should be greater than zero.");
-		return;
 	}
-
-	printf("Benchmarking %d runs, please wait...\n", runs);
-
-	float minDuration = FLT_MAX;
-	float maxDuration = 0.0f;
-	float avgDuration = 0.0f;
-
-	for (int i = 1; i <= runs; i++)
+	else if (runs == 1)
 	{
-		printf("Run %d ", i);
-
-		// run the task to be measured here
-		float timeToCompute = action();
-
-		avgDuration += timeToCompute;
-		if (timeToCompute < minDuration)
-			minDuration = timeToCompute;
-		if (timeToCompute > maxDuration)
-			maxDuration = timeToCompute;
+		action(limit);
 	}
+	else
+	{
+		printf("Benchmarking %d runs, please wait...\n", runs);
 
-	avgDuration /= runs;
-	printf("Time to compute each run %.3fs ~ %.3fs, average %.3fs\n", ((float)(minDuration) / CLOCKS_PER_SEC), ((float)(maxDuration) / CLOCKS_PER_SEC), ((float)(avgDuration) / CLOCKS_PER_SEC));
+		float minDuration = FLT_MAX;
+		float maxDuration = 0.0f;
+		float avgDuration = 0.0f;
+
+		for (int i = 1; i <= runs; i++)
+		{
+			printf("Run %d ", i);
+
+			// run the task to be measured here
+			float timeToCompute = action(limit);
+
+			avgDuration += timeToCompute;
+			if (timeToCompute < minDuration)
+				minDuration = timeToCompute;
+			if (timeToCompute > maxDuration)
+				maxDuration = timeToCompute;
+		}
+
+		avgDuration /= runs;
+		printf("Time to compute each run %.3fs ~ %.3fs, average %.3fs\n", ((float)(minDuration) / CLOCKS_PER_SEC), ((float)(maxDuration) / CLOCKS_PER_SEC), ((float)(avgDuration) / CLOCKS_PER_SEC));
+	}
 }
 
-int main(void)
+void DisplayHelp(void)
 {
-	fp action = &Benchmark;
-	const int runs = 1;
+#if defined NDEBUG
+	const char *owl1 = "\n /\\_/\\\n (O,O)\n (:::)\n--\"-\"--\t\n";
+#else
+	const char *owl1 = "\n /\\_/\\\n (O,O)\n (:::)\n--\"-\"--\t (Debug build)\n";
+#endif
 
-	MultipleRuns(action, runs);
+	printf("%s\n", owl1);
+	printf("This is a C23 language implementation of the benchmark part of the PrimeFactorCS version. It is intended only for benchmarking a C# implementation against a C implementation.\n\n");
+
+	printf("Benchmark, platform performance measurement of primality testing from values from 1 to limit. The default limit is 10,000,000, and the maximum limit value that the implementation will accept is 4,294,967,296. Specifying a limit of 0 will indicate that the maximum limit should be used. This benchmark does not use caching of previously found primes. The default number of runs is 1. When more than 1 run is specified, each benchmark is run in turn, with additional statistical information calculated. Minimum, Maximum, Median and Average.");
+	printf("\t--benchmark [limit | limit runs]\n\n");
+
+	printf("Benchmark2, same as Benchmark1, except that it partitions the number range 1 to limit by the number of available processor cores and performs the primality test in parallel.");
+	printf("\t--benchmark2 [limit | limit runs]\n\n");
+
+	printf("Benchmark3, same as Benchmark1 except that it uses memory to cache the prime values as it proceeds through the number range 1 to limit.");
+	printf("\t--benchmark3 [limit | limit runs]\n\n");
+
+	printf("display version information");
+	printf("\t--version\n\n");
+
+	printf("display this help information");
+	printf("\t--help\n\n");
+}
+
+typedef enum
+{
+	None,
+	Version,
+	Help,
+	Benchmark1,
+	Benchmark2,
+	Benchmark3
+} Command;
+
+typedef struct {
+	Command command;
+	int parameter1;
+	int parameter2;
+} settings;
+
+settings ParseArgs(int argc, char *argv[])
+{
+	settings s = { .command = None, .parameter1 = 0, .parameter2 = 0 };
+
+	if (argc > 1)
+	{
+		if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
+		{
+			s.command = Help;
+		}
+		else if (strcmp(argv[1], "--version") == 0 || strcmp(argv[1], "-v") == 0)
+		{
+			s.command = Version;
+		}
+		else if (strcmp(argv[1], "--benchmark") == 0)
+		{
+			s.command = Benchmark1;
+			if (argc > 2)
+			{
+				s.parameter1 = atoi(argv[2]);
+				if (argc > 3)
+				{
+					s.parameter2 = atoi(argv[3]);
+				}
+			}
+		}
+		else if (strcmp(argv[1], "--benchmark2") == 0)
+		{
+			s.command = Benchmark2;
+			if (argc > 2)
+			{
+				s.parameter1 = atoi(argv[2]);
+				if (argc > 3)
+				{
+					s.parameter2 = atoi(argv[3]);
+				}
+			}
+		}
+		else if (strcmp(argv[1], "--benchmark3") == 0)
+		{
+			s.command = Benchmark3;
+			if (argc > 2)
+			{
+				s.parameter1 = atoi(argv[2]);
+				if (argc > 3)
+				{
+					s.parameter2 = atoi(argv[3]);
+				}
+			}
+		}
+		
+	}
+
+	return s;
+}
+
+int main(int argc, char *argv[])
+{
+	settings s = ParseArgs(argc, argv);
+	switch (s.command)
+	{
+	case Help:
+		DisplayHelp();
+		break;
+	case Version:
+		printf("version %s\n", version);
+		break;
+	case Benchmark1:
+		unsigned long limit = s.parameter1 > 0 ? s.parameter1 : 10000000;
+		int runs = s.parameter2 > 0 ? s.parameter2 : 3;
+		MultipleRuns(Benchmark, limit, runs);
+		break;
+	case Benchmark2:
+		printf("Benchmark2 is not yet implemented.\n");
+		break;
+	case Benchmark3:
+		printf("Benchmark3 is not yet implemented.\n");
+		break;
+	default:
+		printf("No command specified. Use --help to see available commands.\n");
+		break;
+	}
 
 	return 0;
 }

@@ -1,28 +1,57 @@
-CC      = cc
-CFLAGS  = -std=c17 -DNDEBUG -Wall -Wextra -Wpedantic -O2
-CFLAGS += -march=native
-CFLAGS += -flto
-LDFLAGS += -flto
+# --- Configuration ---
+TARGET := PrimeFactorC
+SRC_DIR := src
+BUILD_DIR := build
 
-TARGET  = benchmark
-BUILDDIR = build
-SRCDIR  = src
+# Default to debug if no mode is specified
+MODE ?= debug
 
-SRC = $(SRCDIR)/main.c
-OBJ = $(SRC:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
+# Compiler and standard
+CXX := cc
+CXXFLAGS := -Wall -Wextra -std=c23 -march=native
 
-all: $(BUILDDIR) $(BUILDDIR)/$(TARGET)
+# Mode-specific flags
+ifeq ($(MODE), release)
+    CURRENT_BUILD_DIR := $(BUILD_DIR)/release
+    CXXFLAGS += -O3 -DNDEBUG
+else
+    CURRENT_BUILD_DIR := $(BUILD_DIR)/debug
+    CXXFLAGS += -g -O0
+endif
 
-$(BUILDDIR):
-	mkdir -p $(BUILDDIR)
+# Find all .c files in SRC_DIR
+SRCS := $(wildcard $(SRC_DIR)/*.c)
 
-$(BUILDDIR)/$(TARGET): $(OBJ)
-	$(CC) $^ -o $@ $(LDFLAGS)
+# Convert source files to object files in the specific build directory
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(CURRENT_BUILD_DIR)/%.o)
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# --- Rules ---
+
+.PHONY: all clean help
+
+all: $(CURRENT_BUILD_DIR)/$(TARGET)
+
+# Link the executable
+$(CURRENT_BUILD_DIR)/$(TARGET): $(OBJS)
+	@echo "Linking $(MODE) build: $@"
+	$(CXX) $(OBJS) -o $@
+
+# Compile source files to object files
+$(CURRENT_BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	@echo "Compiling $(MODE): $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILDDIR)
+	@echo "Cleaning up..."
+	rm -rf $(BUILD_DIR)
 
-.PHONY: all clean
+help:
+	@echo
+	@echo "Usage:"
+	@echo "  make               (equivalent to 'make MODE=debug')"
+	@echo "  make MODE=debug"
+	@echo "  make MODE=release"
+	@echo "  make clean.        (clean build artifacts)"
+	@echo "  make help          (display this help message)"
+	@echo

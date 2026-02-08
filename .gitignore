@@ -488,4 +488,6 @@ $RECYCLE.BIN/
 
 # Folders that store generated data.
 GeneratedData/
-PrimeFactorC/build
+
+# Ignoring build output folder for a project named 'PrimeFactorC'
+PrimeFactorC/build/

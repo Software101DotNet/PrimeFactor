@@ -19,8 +19,10 @@
 #include <time.h>
 #include <float.h>
 #include <string.h>
+#include <locale.h>
 
-const char *version = "1.26.02.09";
+// Program version information for this implementation. The version number is in the format of Major.Year.Month.DayOfMonth
+const char *version = "1.26.02.10";
 
 unsigned long GeneratePrimes(unsigned long limit)
 {
@@ -59,7 +61,7 @@ float Benchmark(unsigned long limit)
 {
 	// 18446744073709551615UL (on 64-bit systems)
 	// 4294967295UL           (on 32-bit systems)
-	printf("Benchmarking primality test for values between 1 and %lu ... ", limit);
+	printf("Benchmarking primality test for values between 1 and %'lu ... ", limit);
 	fflush(stdout);
 	clock_t start = clock();
 
@@ -68,7 +70,7 @@ float Benchmark(unsigned long limit)
 
 	clock_t end = clock();
 	clock_t ticks = end - start;
-	printf("%lu primes found in %.3fs\n", primeCount, ((float)(ticks) / CLOCKS_PER_SEC));
+	printf("%'lu primes found in %.3fs\n", primeCount, ((float)(ticks) / CLOCKS_PER_SEC));
 
 	return ticks;
 }
@@ -121,7 +123,7 @@ void DisplayHelp(void)
 	printf("%s\n", owl1);
 	printf("This is a C23 language implementation of the benchmark part of the PrimeFactorCS version. It is intended only for benchmarking a C# implementation against a C implementation.\n\n");
 
-	printf("Benchmark, platform performance measurement of primality testing from values from 1 to limit. The default limit is 10,000,000, and the maximum limit value that the implementation will accept is 4,294,967,296. Specifying a limit of 0 will indicate that the maximum limit should be used. This benchmark does not use caching of previously found primes. The default number of runs is 1. When more than 1 run is specified, each benchmark is run in turn, with additional statistical information calculated. Minimum, Maximum, Median and Average.");
+	printf("Benchmark1, platform performance measurement of primality testing from values from 1 to limit. The default limit is 10,000,000, and the maximum limit value that the implementation will accept is 4,294,967,296. Specifying a limit of 0 will indicate that the maximum limit should be used. This benchmark does not use caching of previously found primes. The default number of runs is 1. When more than 1 run is specified, each benchmark is run in turn, with additional statistical information calculated. Minimum, Maximum, Median and Average.");
 	printf("\t--benchmark [limit | limit runs]\n\n");
 
 	printf("Benchmark2, same as Benchmark1, except that it partitions the number range 1 to limit by the number of available processor cores and performs the primality test in parallel.");
@@ -149,13 +151,13 @@ typedef enum
 
 typedef struct {
 	Command command;
-	int parameter1;
-	int parameter2;
-} settings;
+	long parameter1;
+	long parameter2;
+} Settings;
 
-settings ParseArgs(int argc, char *argv[])
+Settings ParseArgs(int argc, char *argv[])
 {
-	settings s = { .command = None, .parameter1 = 0, .parameter2 = 0 };
+	Settings s = { .command = None, .parameter1 = 0, .parameter2 = 0 };
 
 	if (argc > 1)
 	{
@@ -167,16 +169,29 @@ settings ParseArgs(int argc, char *argv[])
 		{
 			s.command = Version;
 		}
-		else if (strcmp(argv[1], "--benchmark") == 0)
+		else if ((strcmp(argv[1], "--benchmark") == 0) || (strcmp(argv[1], "--benchmark1") == 0))
 		{
 			s.command = Benchmark1;
 			if (argc > 2)
 			{
-				s.parameter1 = atoi(argv[2]);
-				if (argc > 3)
-				{
-					s.parameter2 = atoi(argv[3]);
+				s.parameter1 = atol(argv[2]);	// limit
+
+				// if the limit is 0, then use the maximum limit value that the implementation will accept.
+				if (s.parameter1 <= 0) {
+					s.parameter1 = UINT_MAX;
 				}
+
+				if (argc > 3)
+					s.parameter2 = atol(argv[3]); // runs
+				else
+					s.parameter2 = 1;	// default runs if not specified.
+
+			}
+			else
+			{
+				// No limit or Runs specified for benchmark. Using default limit of 10,000,000 and default runs of 1.
+				s.parameter1 = 10000000;
+				s.parameter2 = 1;
 			}
 		}
 		else if (strcmp(argv[1], "--benchmark2") == 0)
@@ -184,10 +199,10 @@ settings ParseArgs(int argc, char *argv[])
 			s.command = Benchmark2;
 			if (argc > 2)
 			{
-				s.parameter1 = atoi(argv[2]);
+				s.parameter1 = atol(argv[2]);
 				if (argc > 3)
 				{
-					s.parameter2 = atoi(argv[3]);
+					s.parameter2 = atol(argv[3]);
 				}
 			}
 		}
@@ -196,10 +211,10 @@ settings ParseArgs(int argc, char *argv[])
 			s.command = Benchmark3;
 			if (argc > 2)
 			{
-				s.parameter1 = atoi(argv[2]);
+				s.parameter1 = atol(argv[2]);
 				if (argc > 3)
 				{
-					s.parameter2 = atoi(argv[3]);
+					s.parameter2 = atol(argv[3]);
 				}
 			}
 		}
@@ -211,7 +226,10 @@ settings ParseArgs(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	settings s = ParseArgs(argc, argv);
+	// Set the locale to give comma thousands separators in the output when printing large numbers.
+	setlocale(LC_ALL, "en_US.UTF-8");
+
+	Settings s = ParseArgs(argc, argv);
 	switch (s.command)
 	{
 	case Help:
@@ -221,8 +239,8 @@ int main(int argc, char *argv[])
 		printf("version %s\n", version);
 		break;
 	case Benchmark1:
-		unsigned long limit = s.parameter1 > 0 ? s.parameter1 : 10000000;
-		int runs = s.parameter2 > 0 ? s.parameter2 : 3;
+		unsigned long limit = s.parameter1;
+		int runs = s.parameter2;
 		MultipleRuns(Benchmark, limit, runs);
 		break;
 	case Benchmark2:

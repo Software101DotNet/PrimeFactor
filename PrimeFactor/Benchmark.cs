@@ -159,6 +159,23 @@ public class Benchmark
 		Console.WriteLine($"{primeCount:N0} primes found in ".FormatTimeSpan(stopWatch.Elapsed));
 		return new TimeSpan(stopWatch.Elapsed.Ticks);
 	}
+
+	public static TimeSpan Benchmark3(ulong limit)
+	{
+		var writer = new StreamWriter(Stream.Null);
+
+		Console.Write($"Benchmarking primality test for values between 1 and {limit:N0} ... ");
+		Stopwatch stopWatch = new Stopwatch();
+		stopWatch.Restart();
+
+		// using a null stream as there is no need to write the resulting calculations to a screen or file.
+		UInt64[] primes = Prime.GeneratePrimes(writer, maxIndex: limit);
+
+		stopWatch.Stop();
+		Console.WriteLine($"{primes.Length:N0} primes found in ".FormatTimeSpan(stopWatch.Elapsed));
+
+		return new TimeSpan(stopWatch.Elapsed.Ticks);
+	}
 }
 
 

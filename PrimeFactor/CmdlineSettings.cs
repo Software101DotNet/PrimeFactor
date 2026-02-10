@@ -104,24 +104,17 @@ public static class CmdlineSettings
 
 					case "--benchmark1":
 						SetMode(ref settings, Modes.Benchmark1);
-
-						try // benchmark limit and runs are optional values. The first value is interprated as the limit and the second as the number of runs.
-						{
-							var options = ParseCommandValues(param.Value, "--benchmark");
-							if (options.Count >= 1)
-								settings.benchmarkLimit = options[0] <= 0 ? 4294967296 : options[0];    // a given value of 0 is to be interprated to use the max value 2^32
-							if (options.Count >= 2)
-								settings.benchmarkRuns = (int)options[1];
-						}
-						catch (ArgumentException)
-						{
-							// In this case, this is not an error because benchmark runs is optional, so
-							// leave the value as the default value, because an optional value was not specified.
-						}
+						settings = ParseBenchmarkValues(settings, param);
 						break;
 
 					case "--benchmark2":
 						SetMode(ref settings, Modes.Benchmark2);
+						settings = ParseBenchmarkValues(settings, param);
+						break;
+
+					case "--benchmark3":
+						SetMode(ref settings, Modes.Benchmark3);
+						settings = ParseBenchmarkValues(settings, param);
 						break;
 
 					case "--filename":
@@ -215,6 +208,25 @@ public static class CmdlineSettings
 				}
 			}
 			return serise;
+		}
+
+		static Settings ParseBenchmarkValues(Settings settings, KeyValuePair<string, List<string>> param)
+		{
+			try // benchmark limit and runs are optional values. The first value is interprated as the limit and the second as the number of runs.
+			{
+				var options = ParseCommandValues(param.Value, "--benchmark");
+				if (options.Count >= 1)
+					settings.benchmarkLimit = options[0] <= 0 ? 4294967296 : options[0];    // a given value of 0 is to be interprated to use the max value 2^32
+				if (options.Count >= 2)
+					settings.benchmarkRuns = (int)options[1];
+			}
+			catch (ArgumentException)
+			{
+				// In this case, this is not an error because benchmark runs is optional, so
+				// leave the value as the default value, because an optional value was not specified.
+			}
+
+			return settings;
 		}
 	}
 

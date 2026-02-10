@@ -81,7 +81,8 @@ public class Program
 					throw new NotImplementedException("Benchmark2 not implemented in this version.");
 
 				case Modes.Benchmark3:
-					throw new NotImplementedException("Benchmark3 not implemented in this version.");
+					Benchmark.MultipleRuns(Benchmark.Benchmark3, settings.benchmarkLimit, settings.benchmarkRuns);
+					break;
 
 				case Modes.Version:
 					ConsoleDisplay.DisplayVersion();

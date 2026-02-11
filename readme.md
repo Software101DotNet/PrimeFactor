@@ -127,14 +127,26 @@ See the [open issues](https://github.com/Software101DotNet/CreateDotNetProject/i
 
 ## Notes On Performance
 
-Building PrimeFactor for release, using the command line `dotnet build --configuration Release` and running the benchmark 250 times using the command `./bin/Release/net9.0/PrimeFactor --benchmark 250` reviels a performance side effect. 
-Notice that between runs 1 through to run 61 are 
-this is approximatly 34% speedup in performance. This is balived to be due to the way the JIT compiler and the Dot Net runtime performs hot-path optimisations. 
+### benchmark3
+Building PrimeFactor for release using the command line `dotnet build --configuration Release` and running the benchmark3 100 times with the command `./bin/Release/net9.0/PrimeFactor --benchmark3 1000000 100` reveals a performance side effect. between run 61 and 62, a step change in performance occurs. The median value of run 1 to 61 is 600ms, the median value of run 62 to 100 is 479ms. This is a 20% reduction in time taken to compute the same calculation.
+```
+Benchmarking primality test for values between 1 and 1,000,000
+Run 1 completed in 632ms 
+Run 2 completed in 583ms 
+ ...
+Run 61 completed in 604ms 
+Run 62 completed in 479ms 
+ ...
+Run 99 completed in 480ms 
+Run 100 completed in 478ms 
+Time to compute each run 478ms ~ 632ms
+```
+
+Running a longer benchmark of 250 runs of a primality test from 1 to 10 million also results in a step change occurring between runs 61 and 62. This is believed to be due to the JIT compiler and the .NET runtime performing hot-path optimisations. 
 ```
 Benchmarking 250 runs, please wait...
 Run 1 Benchmarking 10,000,000 primes... Completed in 15s 334ms
 Run 2 Benchmarking 10,000,000 primes... Completed in 15s 305ms
-Run 3 Benchmarking 10,000,000 primes... Completed in 15s 309ms
 ...
 Run 61 Benchmarking 10,000,000 primes... Completed in 15s 302ms
 Run 62 Benchmarking 10,000,000 primes... Completed in 11s 446ms
@@ -144,19 +156,8 @@ Run 250 Benchmarking 10,000,000 primes... Completed in 11s 502ms
 Time to compute 11s 412ms ~ 15s 334ms , median 11s 464ms
 ```
 
-### benchmark 2 
-Taking Dotnet memory allocation out of the equation, benchmark2 does not allocate a cache of prime values and just uses the simpler techneque of 
+This anommally was explored further by creating a C language implementing of the same benchmarks. This sub project can be found in the subfolder *PrimeFactorC*
 
-#### The C language implementation
-time ./build/benchmark 
-Benchmarking primality test for values between 1 and 4294967296 ... 203280221 primes found in 3050.858s
-./build/benchmark  3048.46s user 2.40s system 99% cpu 50:52.61 total
-
-#### The C# language implementation
-time ./PrimeFactor/bin/Release/net9.0/PrimeFactor --benchmark2
-Benchmarking primality test for values between 1 and 4,294,967,295 ... 
-203,280,221 primes found in 55m 54s 637ms 
-./PrimeFactor/bin/Release/net9.0/PrimeFactor --benchmark2  3350.18s user 2.64s system 99% cpu 55:54.56 total
 
 ## Contributing
 
